@@ -9,48 +9,71 @@
 return array(
 
 	'exclude' => array(
-		'idx_msordbaprat_si_cd_va',
-		'idx_msordbaseat_si_cd_va',
+		'idx_msordprat_si_cd_va',
+		'idx_msordseat_si_cd_va',
 	),
 
 
 	'table' => array(
 
-		'mshop_order_base' => function( \Doctrine\DBAL\Schema\Schema $schema ) {
+		'mshop_order' => function( \Doctrine\DBAL\Schema\Schema $schema ) {
 
-			$table = $schema->createTable( 'mshop_order_base' );
+			$table = $schema->createTable( 'mshop_order' );
 
 			$table->addColumn( 'id', 'bigint', array( 'autoincrement' => true ) );
 			$table->addColumn( 'siteid', 'integer', array( 'notnull' => false ) );
-			$table->addColumn( 'customerid', 'string', array( 'length' => 36 ) );
 			$table->addColumn( 'sitecode', 'string', array( 'length' => 255, 'notnull' => false ) );
-			$table->addColumn( 'langid', 'string', array( 'length' => 5 ) );
-			$table->addColumn( 'currencyid', 'string', array( 'length' => 3 ) );
-			$table->addColumn( 'price', 'decimal', array( 'precision' => 12, 'scale' => 2 ) );
-			$table->addColumn( 'costs', 'decimal', array( 'precision' => 12, 'scale' => 2 ) );
-			$table->addColumn( 'rebate', 'decimal', array( 'precision' => 12, 'scale' => 2 ) );
-			$table->addColumn( 'tax', 'decimal', array( 'precision' => 14, 'scale' => 4 ) );
-			$table->addColumn( 'taxflag', 'smallint', [] );
-			$table->addColumn( 'customerref', 'string', array( 'length' => 255, 'notnull' => false ) );
-			$table->addColumn( 'comment', 'text', array( 'length' => 0xfff ) );
-			$table->addColumn( 'mtime', 'datetime', [] );
+			$table->addColumn( 'type', 'string', array( 'length' => 64 ) );
+			$table->addColumn( 'datepayment', 'datetime', array( 'notnull' => false ) );
+			$table->addColumn( 'datedelivery', 'datetime', array( 'notnull' => false ) );
+			$table->addColumn( 'statuspayment', 'smallint', array( 'default' => -1 ) );
+			$table->addColumn( 'statusdelivery', 'smallint', array( 'default' => -1 ) );
+			$table->addColumn( 'relatedid', 'bigint', array( 'notnull' => false ) );
+			$table->addColumn( 'langid', 'string', array( 'length' => 5, 'default' => '' ) );
+			$table->addColumn( 'currencyid', 'string', array( 'length' => 3, 'default' => '' ) );
+			$table->addColumn( 'price', 'decimal', array( 'precision' => 12, 'scale' => 2, 'default' => '0.00' ) );
+			$table->addColumn( 'costs', 'decimal', array( 'precision' => 12, 'scale' => 2, 'default' => '0.00' ) );
+			$table->addColumn( 'rebate', 'decimal', array( 'precision' => 12, 'scale' => 2, 'default' => '0.00' ) );
+			$table->addColumn( 'tax', 'decimal', array( 'precision' => 14, 'scale' => 4, 'default' => '0.0000' ) );
+			$table->addColumn( 'taxflag', 'smallint', ['default' => 0] );
+			$table->addColumn( 'customerid', 'string', array( 'length' => 36, 'default' => '' ) );
+			$table->addColumn( 'customerref', 'string', array( 'length' => 255, 'default' => '' ) );
+			$table->addColumn( 'comment', 'text', array( 'length' => 0xfff, 'default' => '' ) );
+			$table->addColumn( 'cdate', 'string', array( 'length' => 10, 'default' => '' ) );
+			$table->addColumn( 'cmonth', 'string', array( 'length' => 7, 'default' => '' ) );
+			$table->addColumn( 'cweek', 'string', array( 'length' => 7, 'default' => '' ) );
+			$table->addColumn( 'cwday', 'string', array( 'length' => 1, 'default' => '' ) );
+			$table->addColumn( 'chour', 'string', array( 'length' => 2, 'default' => '' ) );
 			$table->addColumn( 'ctime', 'datetime', [] );
+			$table->addColumn( 'mtime', 'datetime', [] );
 			$table->addColumn( 'editor', 'string', array( 'length' => 255 ) );
 
-			$table->setPrimaryKey( array( 'id' ), 'pk_msordba_id' );
-			$table->addIndex( array( 'sitecode', 'customerid' ), 'idx_msordba_scode_custid' );
-			$table->addIndex( array( 'siteid', 'customerid' ), 'idx_msordba_sid_custid' );
-			$table->addIndex( array( 'siteid', 'ctime' ), 'idx_msordba_sid_ctime' );
+			$table->setPrimaryKey( array( 'id' ), 'pk_msord_id' );
+			$table->addIndex( array( 'siteid', 'type' ), 'idx_msord_sid_type' );
+			$table->addIndex( array( 'sitecode', 'customerid' ), 'idx_msord_scode_custid' );
+			$table->addIndex( array( 'siteid', 'mtime', 'statuspayment' ), 'idx_msord_sid_mtime_pstat' );
+			$table->addIndex( array( 'siteid', 'mtime', 'statusdelivery' ), 'idx_msord_sid_mtime_dstat' );
+			$table->addIndex( array( 'siteid', 'statusdelivery' ), 'idx_msord_sid_dstatus' );
+			$table->addIndex( array( 'siteid', 'datedelivery' ), 'idx_msord_sid_ddate' );
+			$table->addIndex( array( 'siteid', 'datepayment' ), 'idx_msord_sid_pdate' );
+			$table->addIndex( array( 'siteid', 'customerid' ), 'idx_msord_sid_custid' );
+			$table->addIndex( array( 'siteid', 'editor' ), 'idx_msord_sid_editor' );
+			$table->addIndex( array( 'siteid', 'ctime' ), 'idx_msord_sid_ctime' );
+			$table->addIndex( array( 'siteid', 'cdate' ), 'idx_msord_sid_cdate' );
+			$table->addIndex( array( 'siteid', 'cmonth' ), 'idx_msord_sid_cmonth' );
+			$table->addIndex( array( 'siteid', 'cweek' ), 'idx_msord_sid_cweek' );
+			$table->addIndex( array( 'siteid', 'cwday' ), 'idx_msord_sid_cwday' );
+			$table->addIndex( array( 'siteid', 'chour' ), 'idx_msord_sid_chour' );
 
 			return $schema;
 		},
 
-		'mshop_order_base_address' => function( \Doctrine\DBAL\Schema\Schema $schema ) {
+		'mshop_order_address' => function( \Doctrine\DBAL\Schema\Schema $schema ) {
 
-			$table = $schema->createTable( 'mshop_order_base_address' );
+			$table = $schema->createTable( 'mshop_order_address' );
 
 			$table->addColumn( 'id', 'bigint', array( 'autoincrement' => true ) );
-			$table->addColumn( 'baseid', 'bigint', [] );
+			$table->addColumn( 'orderid', 'bigint', [] );
 			$table->addColumn( 'siteid', 'integer', array( 'notnull' => false ) );
 			$table->addColumn( 'addrid', 'string', array( 'length' => 36 ) );
 			$table->addColumn( 'type', 'string', array( 'length' => 64 ) );
@@ -79,28 +102,28 @@ return array(
 			$table->addColumn( 'ctime', 'datetime', [] );
 			$table->addColumn( 'editor', 'string', array( 'length' => 255 ) );
 
-			$table->setPrimaryKey( array( 'id' ), 'pk_msordbaad_id' );
-			$table->addUniqueIndex( array( 'baseid', 'type' ), 'unq_msordbaad_bid_type' );
-			$table->addIndex( array( 'siteid', 'baseid', 'type' ), 'idx_msordbaad_sid_bid_typ' );
-			$table->addIndex( array( 'baseid', 'siteid', 'lastname' ), 'idx_msordbaad_bid_sid_lname' );
-			$table->addIndex( array( 'baseid', 'siteid', 'address1' ), 'idx_msordbaad_bid_sid_addr1' );
-			$table->addIndex( array( 'baseid', 'siteid', 'postal' ), 'idx_msordbaad_bid_sid_postal' );
-			$table->addIndex( array( 'baseid', 'siteid', 'city' ), 'idx_msordbaad_bid_sid_city' );
-			$table->addIndex( array( 'baseid', 'siteid', 'email' ), 'idx_msordbaad_bid_sid_email' );
-			$table->addIndex( array( 'baseid' ), 'fk_msordbaad_baseid' );
+			$table->setPrimaryKey( array( 'id' ), 'pk_msordad_id' );
+			$table->addUniqueIndex( array( 'orderid', 'type' ), 'unq_msordad_bid_type' );
+			$table->addIndex( array( 'siteid', 'orderid', 'type' ), 'idx_msordad_sid_bid_typ' );
+			$table->addIndex( array( 'orderid', 'siteid', 'lastname' ), 'idx_msordad_bid_sid_lname' );
+			$table->addIndex( array( 'orderid', 'siteid', 'address1' ), 'idx_msordad_bid_sid_addr1' );
+			$table->addIndex( array( 'orderid', 'siteid', 'postal' ), 'idx_msordad_bid_sid_postal' );
+			$table->addIndex( array( 'orderid', 'siteid', 'city' ), 'idx_msordad_bid_sid_city' );
+			$table->addIndex( array( 'orderid', 'siteid', 'email' ), 'idx_msordad_bid_sid_email' );
+			$table->addIndex( array( 'orderid' ), 'fk_msordad_orderid' );
 
-			$table->addForeignKeyConstraint( 'mshop_order_base', array( 'baseid' ), array( 'id' ),
-				array( 'onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE' ), 'fk_msordbaad_baseid' );
+			$table->addForeignKeyConstraint( 'mshop_order', array( 'orderid' ), array( 'id' ),
+				array( 'onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE' ), 'fk_msordad_orderid' );
 
 			return $schema;
 		},
 
-		'mshop_order_base_product' => function( \Doctrine\DBAL\Schema\Schema $schema ) {
+		'mshop_order_product' => function( \Doctrine\DBAL\Schema\Schema $schema ) {
 
-			$table = $schema->createTable( 'mshop_order_base_product' );
+			$table = $schema->createTable( 'mshop_order_product' );
 
 			$table->addColumn( 'id', 'bigint', array( 'autoincrement' => true ) );
-			$table->addColumn( 'baseid', 'bigint', [] );
+			$table->addColumn( 'orderid', 'bigint', [] );
 			$table->addColumn( 'siteid', 'integer', array( 'notnull' => false ) );
 			$table->addColumn( 'ordprodid', 'bigint', array( 'notnull' => false ) );
 			$table->addColumn( 'ordaddrid', 'bigint', array( 'notnull' => false ) );
@@ -129,24 +152,24 @@ return array(
 			$table->addColumn( 'ctime', 'datetime', [] );
 			$table->addColumn( 'editor', 'string', array( 'length' => 255 ) );
 
-			$table->setPrimaryKey( array( 'id' ), 'pk_msordbapr_id' );
-			$table->addUniqueIndex( array( 'baseid', 'pos' ), 'unq_msordbapr_bid_pos' );
-			$table->addIndex( array( 'siteid', 'baseid', 'prodcode' ), 'idx_msordbapr_sid_bid_pcd' );
-			$table->addIndex( array( 'siteid', 'ctime', 'prodid', 'baseid' ), 'idx_msordbapr_sid_ct_pid_bid' );
-			$table->addIndex( array( 'baseid' ), 'fk_msordbapr_baseid' );
+			$table->setPrimaryKey( array( 'id' ), 'pk_msordpr_id' );
+			$table->addUniqueIndex( array( 'orderid', 'pos' ), 'unq_msordpr_oid_pos' );
+			$table->addIndex( array( 'siteid', 'orderid', 'prodcode' ), 'idx_msordpr_sid_bid_pcd' );
+			$table->addIndex( array( 'siteid', 'ctime', 'prodid', 'orderid' ), 'idx_msordpr_sid_ct_pid_bid' );
+			$table->addIndex( array( 'orderid' ), 'fk_msordpr_orderid' );
 
-			$table->addForeignKeyConstraint( 'mshop_order_base', array( 'baseid' ), array( 'id' ),
-				array( 'onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE' ), 'fk_msordbapr_baseid' );
+			$table->addForeignKeyConstraint( 'mshop_order', array( 'orderid' ), array( 'id' ),
+				array( 'onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE' ), 'fk_msordpr_orderid' );
 
 			return $schema;
 		},
 
-		'mshop_order_base_product_attr' => function( \Doctrine\DBAL\Schema\Schema $schema ) {
+		'mshop_order_product_attr' => function( \Doctrine\DBAL\Schema\Schema $schema ) {
 
-			$table = $schema->createTable( 'mshop_order_base_product_attr' );
+			$table = $schema->createTable( 'mshop_order_product_attr' );
 
 			$table->addColumn( 'id', 'bigint', array( 'autoincrement' => true ) );
-			$table->addColumn( 'ordprodid', 'bigint', [] );
+			$table->addColumn( 'parentid', 'bigint', [] );
 			$table->addColumn( 'siteid', 'integer', array( 'notnull' => false ) );
 			$table->addColumn( 'attrid', 'string', array( 'length' => 36 ) );
 			$table->addColumn( 'type', 'string', array( 'length' => 64 ) );
@@ -158,22 +181,22 @@ return array(
 			$table->addColumn( 'ctime', 'datetime', [] );
 			$table->addColumn( 'editor', 'string', array( 'length' => 255 ) );
 
-			$table->setPrimaryKey( array( 'id' ), 'pk_msordbaprat_id' );
-			$table->addUniqueIndex( array( 'ordprodid', 'attrid', 'type', 'code' ), 'unq_msordbaprat_oid_aid_ty_cd' );
-			$table->addIndex( array( 'ordprodid' ), 'fk_msordbaprat_ordprodid' );
+			$table->setPrimaryKey( array( 'id' ), 'pk_msordprat_id' );
+			$table->addUniqueIndex( array( 'parentid', 'attrid', 'type', 'code' ), 'unq_msordprat_oid_aid_ty_cd' );
+			$table->addIndex( array( 'parentid' ), 'fk_msordprat_parentid' );
 
-			$table->addForeignKeyConstraint( 'mshop_order_base_product', array( 'ordprodid' ), array( 'id' ),
-				array( 'onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE' ), 'fk_msordbaprat_ordprodid' );
+			$table->addForeignKeyConstraint( 'mshop_order_product', array( 'parentid' ), array( 'id' ),
+				array( 'onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE' ), 'fk_msordprat_parentid' );
 
 			return $schema;
 		},
 
-		'mshop_order_base_service' => function( \Doctrine\DBAL\Schema\Schema $schema ) {
+		'mshop_order_service' => function( \Doctrine\DBAL\Schema\Schema $schema ) {
 
-			$table = $schema->createTable( 'mshop_order_base_service' );
+			$table = $schema->createTable( 'mshop_order_service' );
 
 			$table->addColumn( 'id', 'bigint', array( 'autoincrement' => true ) );
-			$table->addColumn( 'baseid', 'bigint', [] );
+			$table->addColumn( 'orderid', 'bigint', [] );
 			$table->addColumn( 'siteid', 'integer', array( 'notnull' => false ) );
 			$table->addColumn( 'servid', 'string', array( 'length' => 36 ) );
 			$table->addColumn( 'type', 'string', array( 'length' => 64 ) );
@@ -192,23 +215,23 @@ return array(
 			$table->addColumn( 'ctime', 'datetime', [] );
 			$table->addColumn( 'editor', 'string', array( 'length' => 255 ) );
 
-			$table->setPrimaryKey( array( 'id' ), 'pk_msordbase_id' );
-			$table->addUniqueIndex( array( 'siteid', 'baseid', 'code', 'type' ), 'unq_msordbase_sid_bid_cd_typ' );
-			$table->addIndex( array( 'siteid', 'code', 'type' ), 'idx_msordbase_sid_code_type' );
-			$table->addIndex( array( 'baseid' ), 'fk_msordbase_baseid' );
+			$table->setPrimaryKey( array( 'id' ), 'pk_msordse_id' );
+			$table->addUniqueIndex( array( 'siteid', 'orderid', 'code', 'type' ), 'unq_msordse_sid_bid_cd_typ' );
+			$table->addIndex( array( 'siteid', 'code', 'type' ), 'idx_msordse_sid_code_type' );
+			$table->addIndex( array( 'orderid' ), 'fk_msordse_orderid' );
 
-			$table->addForeignKeyConstraint( 'mshop_order_base', array( 'baseid' ), array( 'id' ),
-				array( 'onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE' ), 'fk_msordbase_baseid' );
+			$table->addForeignKeyConstraint( 'mshop_order', array( 'orderid' ), array( 'id' ),
+				array( 'onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE' ), 'fk_msordse_orderid' );
 
 			return $schema;
 		},
 
-		'mshop_order_base_service_attr' => function( \Doctrine\DBAL\Schema\Schema $schema ) {
+		'mshop_order_service_attr' => function( \Doctrine\DBAL\Schema\Schema $schema ) {
 
-			$table = $schema->createTable( 'mshop_order_base_service_attr' );
+			$table = $schema->createTable( 'mshop_order_service_attr' );
 
 			$table->addColumn( 'id', 'bigint', array( 'autoincrement' => true ) );
-			$table->addColumn( 'ordservid', 'bigint', [] );
+			$table->addColumn( 'parentid', 'bigint', [] );
 			$table->addColumn( 'siteid', 'integer', array( 'notnull' => false ) );
 			$table->addColumn( 'attrid', 'string', array( 'length' => 36 ) );
 			$table->addColumn( 'type', 'string', array( 'length' => 64 ) );
@@ -220,22 +243,22 @@ return array(
 			$table->addColumn( 'ctime', 'datetime', [] );
 			$table->addColumn( 'editor', 'string', array( 'length' => 255 ) );
 
-			$table->setPrimaryKey( array( 'id' ), 'pk_msordbaseat_id' );
-			$table->addUniqueIndex( array( 'ordservid', 'attrid', 'type', 'code' ), 'unq_msordbaseat_oid_aid_ty_cd' );
-			$table->addIndex( array( 'ordservid' ), 'fk_msordbaseat_ordservid' );
+			$table->setPrimaryKey( array( 'id' ), 'pk_msordseat_id' );
+			$table->addUniqueIndex( array( 'parentid', 'attrid', 'type', 'code' ), 'unq_msordseat_oid_aid_ty_cd' );
+			$table->addIndex( array( 'parentid' ), 'fk_msordseat_parentid' );
 
-			$table->addForeignKeyConstraint( 'mshop_order_base_service', array( 'ordservid' ), array( 'id' ),
-				array( 'onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE' ), 'fk_msordbaseat_ordservid' );
+			$table->addForeignKeyConstraint( 'mshop_order_service', array( 'parentid' ), array( 'id' ),
+				array( 'onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE' ), 'fk_msordseat_parentid' );
 
 			return $schema;
 		},
 
-		'mshop_order_base_coupon' => function( \Doctrine\DBAL\Schema\Schema $schema ) {
+		'mshop_order_coupon' => function( \Doctrine\DBAL\Schema\Schema $schema ) {
 
-			$table = $schema->createTable( 'mshop_order_base_coupon' );
+			$table = $schema->createTable( 'mshop_order_coupon' );
 
 			$table->addColumn( 'id', 'bigint', array( 'autoincrement' => true ) );
-			$table->addColumn( 'baseid', 'bigint', [] );
+			$table->addColumn( 'orderid', 'bigint', [] );
 			$table->addColumn( 'siteid', 'integer', array( 'notnull' => false ) );
 			$table->addColumn( 'ordprodid', 'bigint', array( 'notnull' => false ) );
 			$table->addColumn( 'code', 'string', array( 'length' => 64 ) );
@@ -243,60 +266,16 @@ return array(
 			$table->addColumn( 'ctime', 'datetime', [] );
 			$table->addColumn( 'editor', 'string', array( 'length' => 255 ) );
 
-			$table->setPrimaryKey( array( 'id' ), 'pk_msordbaco_id' );
-			$table->addIndex( array( 'siteid', 'baseid', 'code' ), 'idx_msordbaco_sid_bid_code' );
-			$table->addIndex( array( 'ordprodid' ), 'fk_msordbaco_ordprodid' );
-			$table->addIndex( array( 'baseid' ), 'fk_msordbaco_baseid' );
+			$table->setPrimaryKey( array( 'id' ), 'pk_msordco_id' );
+			$table->addIndex( array( 'siteid', 'orderid', 'code' ), 'idx_msordco_sid_bid_code' );
+			$table->addIndex( array( 'ordprodid' ), 'fk_msordco_ordprodid' );
+			$table->addIndex( array( 'orderid' ), 'fk_msordco_orderid' );
 
-			$table->addForeignKeyConstraint( 'mshop_order_base_product', array( 'ordprodid' ), array( 'id' ),
-				array( 'onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE' ), 'fk_msordbaco_ordprodid' );
+			$table->addForeignKeyConstraint( 'mshop_order_product', array( 'ordprodid' ), array( 'id' ),
+				array( 'onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE' ), 'fk_msordco_ordprodid' );
 
-			$table->addForeignKeyConstraint( 'mshop_order_base', array( 'baseid' ), array( 'id' ),
-				array( 'onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE' ), 'fk_msordbaco_baseid' );
-
-			return $schema;
-		},
-
-		'mshop_order' => function( \Doctrine\DBAL\Schema\Schema $schema ) {
-
-			$table = $schema->createTable( 'mshop_order' );
-
-			$table->addColumn( 'id', 'bigint', array( 'autoincrement' => true ) );
-			$table->addColumn( 'baseid', 'bigint', [] );
-			$table->addColumn( 'siteid', 'integer', array( 'notnull' => false ) );
-			$table->addColumn( 'type', 'string', array( 'length' => 64 ) );
-			$table->addColumn( 'datepayment', 'datetime', array( 'notnull' => false ) );
-			$table->addColumn( 'datedelivery', 'datetime', array( 'notnull' => false ) );
-			$table->addColumn( 'statuspayment', 'smallint', array( 'default' => -1 ) );
-			$table->addColumn( 'statusdelivery', 'smallint', array( 'default' => -1 ) );
-			$table->addColumn( 'relatedid', 'bigint', array( 'notnull' => false ) );
-			$table->addColumn( 'cdate', 'string', array( 'length' => 10 ) );
-			$table->addColumn( 'cmonth', 'string', array( 'length' => 7 ) );
-			$table->addColumn( 'cweek', 'string', array( 'length' => 7 ) );
-			$table->addColumn( 'cwday', 'string', array( 'length' => 1 ) );
-			$table->addColumn( 'chour', 'string', array( 'length' => 2 ) );
-			$table->addColumn( 'ctime', 'datetime', [] );
-			$table->addColumn( 'mtime', 'datetime', [] );
-			$table->addColumn( 'editor', 'string', array( 'length' => 255 ) );
-
-			$table->setPrimaryKey( array( 'id' ), 'pk_msord_id' );
-			$table->addIndex( array( 'siteid', 'type' ), 'idx_msord_sid_type' );
-			$table->addIndex( array( 'siteid', 'mtime', 'statuspayment' ), 'idx_msord_sid_mtime_pstat' );
-			$table->addIndex( array( 'siteid', 'mtime', 'statusdelivery' ), 'idx_msord_sid_mtime_dstat' );
-			$table->addIndex( array( 'siteid', 'statusdelivery' ), 'idx_msord_sid_dstatus' );
-			$table->addIndex( array( 'siteid', 'datedelivery' ), 'idx_msord_sid_ddate' );
-			$table->addIndex( array( 'siteid', 'datepayment' ), 'idx_msord_sid_pdate' );
-			$table->addIndex( array( 'siteid', 'editor' ), 'idx_msord_sid_editor' );
-			$table->addIndex( array( 'siteid', 'ctime' ), 'idx_msord_sid_ctime' );
-			$table->addIndex( array( 'siteid', 'cdate' ), 'idx_msord_sid_cdate' );
-			$table->addIndex( array( 'siteid', 'cmonth' ), 'idx_msord_sid_cmonth' );
-			$table->addIndex( array( 'siteid', 'cweek' ), 'idx_msord_sid_cweek' );
-			$table->addIndex( array( 'siteid', 'cwday' ), 'idx_msord_sid_cwday' );
-			$table->addIndex( array( 'siteid', 'chour' ), 'idx_msord_sid_chour' );
-			$table->addIndex( array( 'baseid' ), 'fk_msord_baseid' );
-
-			$table->addForeignKeyConstraint( 'mshop_order_base', array( 'baseid' ), array( 'id' ),
-				array( 'onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE' ), 'fk_msord_baseid' );
+			$table->addForeignKeyConstraint( 'mshop_order', array( 'orderid' ), array( 'id' ),
+				array( 'onUpdate' => 'CASCADE', 'onDelete' => 'CASCADE' ), 'fk_msordco_orderid' );
 
 			return $schema;
 		},
