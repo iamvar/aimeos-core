@@ -24,12 +24,4 @@ return array(
 		'OPQR' => array( 'parentid' => 'Example/1', 'code' => 'OPQR', 'count' => 2000000, 'start' => null, 'end' => null ),
 		'STUV' => array( 'parentid' => 'Voucher/1', 'code' => 'STUV', 'count' => 1, 'start' => null, 'end' => null ),
 	),
-
-	//ordprodid => prodcode/quantity/pos
-	'order/base/coupon' => array(
-		array( 'baseid' => '53.50', 'ordprodid' => 'U:MD/1/3', 'code' => '5678' ),
-		array( 'baseid' => '53.50', 'ordprodid' => 'ABCD/1/4', 'code' => 'OPQR' ),
-		array( 'baseid' => '672.00', 'ordprodid' => 'CNE/2/1', 'code' => '5678' ),
-		array( 'baseid' => '672.00', 'ordprodid' => 'CNC/1/2', 'code' => 'OPQR' ),
-	)
 );

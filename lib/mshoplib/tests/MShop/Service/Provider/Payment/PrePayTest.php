@@ -24,8 +24,8 @@ class PrePayTest extends \PHPUnit\Framework\TestCase
 		$serviceItem->setCode( 'test' );
 
 		$this->object = $this->getMockBuilder( \Aimeos\MShop\Service\Provider\Payment\PrePay::class )
-			->setMethods( array( 'getOrder', 'getOrderBase', 'saveOrder', 'saveOrderBase' ) )
-			->setConstructorArgs( array( $context, $serviceItem ) )
+			->setConstructorArgs( [$context, $serviceItem] )
+			->setMethods( ['getOrder', 'saveOrder'] )
 			->getMock();
 	}
 
@@ -81,7 +81,7 @@ class PrePayTest extends \PHPUnit\Framework\TestCase
 
 	public function testSetConfigFE()
 	{
-		$item = \Aimeos\MShop::create( \TestHelperMShop::getContext(), 'order/base/service' )->createItem();
+		$item = \Aimeos\MShop::create( \TestHelperMShop::getContext(), 'order/service' )->createItem();
 		$this->object->setConfigFE( $item, array( 'test.code' => 'abc', 'test.number' => 123 ) );
 
 		$this->assertEquals( 2, count( $item->getAttributeItems() ) );

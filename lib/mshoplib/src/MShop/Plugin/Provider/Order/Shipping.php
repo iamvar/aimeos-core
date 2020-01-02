@@ -111,11 +111,11 @@ class Shipping
 	 */
 	public function update( \Aimeos\MW\Observer\Publisher\Iface $order, $action, $value = null )
 	{
-		\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Base\Iface::class, $order );
+		\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Iface::class, $order );
 
 		$services = $order->getServices();
 		$currency = $order->getPrice()->getCurrencyId();
-		$type = \Aimeos\MShop\Order\Item\Base\Service\Base::TYPE_DELIVERY;
+		$type = \Aimeos\MShop\Order\Item\Service\Base::TYPE_DELIVERY;
 		$threshold = $this->getItemBase()->getConfigValue( 'threshold/' . $currency );
 
 		if( $threshold && isset( $services[$type] ) )
@@ -143,7 +143,7 @@ class Shipping
 	/**
 	 * Tests if the shipping threshold is reached and updates the price accordingly
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Product\Iface[] $orderProducts List of ordered products
+	 * @param \Aimeos\MShop\Order\Item\Product\Iface[] $orderProducts List of ordered products
 	 * @param array $threshold Associative list of currency/threshold pairs
 	 * @return boolean True if threshold is reached, false if not
 	 */

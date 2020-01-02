@@ -13,7 +13,7 @@ namespace Aimeos\MShop\Coupon\Provider\Decorator;
 class RequiredTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
-	private $orderBase;
+	private $order;
 	private $couponItem;
 
 
@@ -28,8 +28,8 @@ class RequiredTest extends \PHPUnit\Framework\TestCase
 		$this->object->setObject( $this->object );
 
 		$orderManager = \Aimeos\MShop\Order\Manager\Factory::create( $context );
-		$orderBaseManager = $orderManager->getSubManager( 'base' );
-		$orderProductManager = $orderBaseManager->getSubManager( 'product' );
+		$orderManager = $orderManager;
+		$orderProductManager = $orderManager->getSubManager( 'product' );
 
 		$productManager = \Aimeos\MShop\Product\Manager\Factory::create( $context );
 		$search = $productManager->createSearch();
@@ -49,15 +49,15 @@ class RequiredTest extends \PHPUnit\Framework\TestCase
 
 		$orderProducts['CNC']->setPrice( $price );
 
-		$this->orderBase = new \Aimeos\MShop\Order\Item\Base\Standard( $priceManager->createItem(), $context->getLocale() );
-		$this->orderBase->addProduct( $orderProducts['CNC'] );
+		$this->order = new \Aimeos\MShop\Order\Item\Standard( $priceManager->createItem(), $context->getLocale() );
+		$this->order->addProduct( $orderProducts['CNC'] );
 	}
 
 
 	protected function tearDown()
 	{
 		unset( $this->object );
-		unset( $this->orderBase );
+		unset( $this->order );
 		unset( $this->couponItem );
 	}
 
@@ -91,7 +91,7 @@ class RequiredTest extends \PHPUnit\Framework\TestCase
 
 	public function testIsAvailable()
 	{
-		$this->assertTrue( $this->object->isAvailable( $this->orderBase ) );
+		$this->assertTrue( $this->object->isAvailable( $this->order ) );
 	}
 
 
@@ -99,7 +99,7 @@ class RequiredTest extends \PHPUnit\Framework\TestCase
 	{
 		$this->couponItem->setConfig( array( 'required.productcode' => 'CNC' ) );
 
-		$this->assertTrue( $this->object->isAvailable( $this->orderBase ) );
+		$this->assertTrue( $this->object->isAvailable( $this->order ) );
 	}
 
 
@@ -107,7 +107,7 @@ class RequiredTest extends \PHPUnit\Framework\TestCase
 	{
 		$this->couponItem->setConfig( array( 'required.productcode' => 'CNE' ) );
 
-		$this->assertFalse( $this->object->isAvailable( $this->orderBase ) );
+		$this->assertFalse( $this->object->isAvailable( $this->order ) );
 	}
 
 }

@@ -228,9 +228,9 @@ class Standard
 
 
 	/**
-	 * Returns modify date/time of the order item base product.
+	 * Returns modify date/time of the order item product.
 	 *
-	 * @return string Returns modify date/time of the order base item
+	 * @return string Returns modify date/time of the order item
 	 */
 	public function getTimeModified()
 	{

@@ -56,11 +56,11 @@ class ProductGone
 	 */
 	public function update( \Aimeos\MW\Observer\Publisher\Iface $order, $action, $value = null )
 	{
-		if( ( $value & \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT ) === 0 ) {
+		if( ( $value & \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT ) === 0 ) {
 			return $value;
 		}
 
-		\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Base\Iface::class, $order );
+		\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Iface::class, $order );
 
 		$productIds = [];
 		foreach( $order->getProducts() as $pr ) {

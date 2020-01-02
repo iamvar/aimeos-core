@@ -20,7 +20,7 @@ class StandardTest extends \PHPUnit\Framework\TestCase
 		$this->values = array(
 			'subscription.id' => 15,
 			'subscription.siteid' => 99,
-			'subscription.ordbaseid' => 12,
+			'subscription.orderid' => 12,
 			'subscription.ordprodid' => 123,
 			'subscription.productid' => '456',
 			'subscription.datenext' => '2000-01-01',
@@ -74,16 +74,16 @@ class StandardTest extends \PHPUnit\Framework\TestCase
 
 	public function testGetOrderBaseId()
 	{
-		$this->assertEquals( $this->values['subscription.ordbaseid'], $this->object->getOrderBaseId() );
+		$this->assertEquals( $this->values['subscription.orderid'], $this->object->getOrderId() );
 	}
 
 
 	public function testSetOrderBaseId()
 	{
-		$return = $this->object->setOrderBaseId( 15 );
+		$return = $this->object->setOrderId( 15 );
 
 		$this->assertInstanceOf( \Aimeos\MShop\Subscription\Item\Iface::class, $return );
-		$this->assertEquals( 15, $this->object->getOrderBaseId() );
+		$this->assertEquals( 15, $this->object->getOrderId() );
 		$this->assertTrue( $this->object->isModified() );
 	}
 
@@ -275,7 +275,7 @@ class StandardTest extends \PHPUnit\Framework\TestCase
 
 		$list = $entries = array(
 			'subscription.id' => 1,
-			'subscription.ordbaseid' => 2,
+			'subscription.orderid' => 2,
 			'subscription.ordprodid' => 3,
 			'subscription.productid' => '456',
 			'subscription.datenext' => '2019-01-01',
@@ -290,7 +290,7 @@ class StandardTest extends \PHPUnit\Framework\TestCase
 
 		$this->assertEquals( [], $entries );
 		$this->assertEquals( $list['subscription.id'], $item->getId() );
-		$this->assertEquals( $list['subscription.ordbaseid'], $item->getOrderBaseId() );
+		$this->assertEquals( $list['subscription.orderid'], $item->getOrderId() );
 		$this->assertEquals( $list['subscription.ordprodid'], $item->getOrderProductId() );
 		$this->assertEquals( $list['subscription.productid'], $item->getProductId() );
 		$this->assertEquals( $list['subscription.datenext'], $item->getDateNext() );
@@ -309,7 +309,7 @@ class StandardTest extends \PHPUnit\Framework\TestCase
 
 		$this->assertEquals( $this->object->getId(), $list['subscription.id'] );
 		$this->assertEquals( $this->object->getSiteId(), $list['subscription.siteid'] );
-		$this->assertEquals( $this->object->getOrderBaseId(), $list['subscription.ordbaseid'] );
+		$this->assertEquals( $this->object->getOrderId(), $list['subscription.orderid'] );
 		$this->assertEquals( $this->object->getOrderProductId(), $list['subscription.ordprodid'] );
 		$this->assertEquals( $this->object->getProductId(), $list['subscription.productid'] );
 		$this->assertEquals( $this->object->getDateNext(), $list['subscription.datenext'] );

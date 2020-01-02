@@ -99,21 +99,21 @@ class ProductPrice
 	 */
 	public function update( \Aimeos\MW\Observer\Publisher\Iface $order, $action, $value = null )
 	{
-		if( ( $value & \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT ) === 0 ) {
+		if( ( $value & \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT ) === 0 ) {
 			return $value;
 		}
 
-		\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Base\Iface::class, $order );
+		\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Iface::class, $order );
 
 		$attrIds = $prodCodes = $changedProducts = [];
 		$orderProducts = $order->getProducts();
 
 		foreach( $orderProducts as $pos => $item )
 		{
-			if( $item->getFlags() & \Aimeos\MShop\Order\Item\Base\Product\Base::FLAG_IMMUTABLE ) {
+			if( $item->getFlags() & \Aimeos\MShop\Order\Item\Product\Base::FLAG_IMMUTABLE ) {
 				unset( $orderProducts[$pos] );
 			}
-			
+
 			if( $this->getConfigValue( 'ignore-modified' ) == true && $item->getPrice()->isModified() ) {
 				unset( $orderProducts[$pos] );
 			}
@@ -225,13 +225,13 @@ class ProductPrice
 	/**
 	 * Returns the actual price for the given order product.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Product\Iface $orderProduct Ordered product
+	 * @param \Aimeos\MShop\Order\Item\Product\Iface $orderProduct Ordered product
 	 * @param \Aimeos\MShop\Price\Item\Iface[] $refPrices Prices associated to the original product
 	 * @param \Aimeos\MShop\Attribute\Item\Iface[] $attributes Attribute items with prices
 	 * @param integer $pos Position of the product in the basket
 	 * @return \Aimeos\MShop\Price\Item\Iface Price item including the calculated price
 	 */
-	private function getPrice( \Aimeos\MShop\Order\Item\Base\Product\Iface $orderProduct, array $refPrices, array $attributes, $pos )
+	private function getPrice( \Aimeos\MShop\Order\Item\Product\Iface $orderProduct, array $refPrices, array $attributes, $pos )
 	{
 		$context = $this->getContext();
 

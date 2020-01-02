@@ -57,10 +57,10 @@ abstract class Base
 	 * Usually, this is the lowest price that is available in the service item but can also be a calculated based on
 	 * the basket content, e.g. 2% of the value as transaction cost.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $basket Basket object
+	 * @param \Aimeos\MShop\Order\Item\Iface $basket Basket object
 	 * @return \Aimeos\MShop\Price\Item\Iface Price item containing the price, shipping, rebate
 	 */
-	public function calcPrice( \Aimeos\MShop\Order\Item\Base\Iface $basket )
+	public function calcPrice( \Aimeos\MShop\Order\Item\Iface $basket )
 	{
 		$priceManager = \Aimeos\MShop::create( $this->context, 'price' );
 		$prices = $this->serviceItem->getRefItems( 'price', 'default', 'default' );
@@ -115,10 +115,10 @@ abstract class Base
 	 * Returns the configuration attribute definitions of the provider to generate a list of available fields and
 	 * rules for the value of each field in the frontend.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $basket Basket object
+	 * @param \Aimeos\MShop\Order\Item\Iface $basket Basket object
 	 * @return array List of attribute definitions implementing \Aimeos\MW\Common\Critera\Attribute\Iface
 	 */
-	public function getConfigFE( \Aimeos\MShop\Order\Item\Base\Iface $basket )
+	public function getConfigFE( \Aimeos\MShop\Order\Item\Iface $basket )
 	{
 		return [];
 	}
@@ -161,10 +161,10 @@ abstract class Base
 	 * Checks if payment provider can be used based on the basket content.
 	 * Checks for country, currency, address, RMS, etc. -> in separate decorators
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $basket Basket object
+	 * @param \Aimeos\MShop\Order\Item\Iface $basket Basket object
 	 * @return boolean True if payment provider can be used, false if not
 	 */
-	public function isAvailable( \Aimeos\MShop\Order\Item\Base\Iface $basket )
+	public function isAvailable( \Aimeos\MShop\Order\Item\Iface $basket )
 	{
 		return true;
 	}
@@ -355,13 +355,13 @@ abstract class Base
 	/**
 	 * Returns the order service matching the given code from the basket
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $basket Basket object
+	 * @param \Aimeos\MShop\Order\Item\Iface $basket Basket object
 	 * @param string $type Service type constant from \Aimeos\MShop\Order\Item\Service\Base
 	 * @param string $code Code of the service item that should be returned
-	 * @return \Aimeos\MShop\Order\Item\Base\Service\Iface Order service item
+	 * @return \Aimeos\MShop\Order\Item\Service\Iface Order service item
 	 * @throws \Aimeos\MShop\Order\Exception If no service for the given type and code is found
 	 */
-	protected function getBasketService( \Aimeos\MShop\Order\Item\Base\Iface $basket, $type, $code )
+	protected function getBasketService( \Aimeos\MShop\Order\Item\Iface $basket, $type, $code )
 	{
 		foreach( $basket->getService( $type ) as $service )
 		{
@@ -390,42 +390,15 @@ abstract class Base
 
 
 	/**
-	 * Returns the order item for the given ID.
+	 * Returns the order which is equivalent to the basket.
 	 *
-	 * @param string $id Unique order ID
-	 * @return \Aimeos\MShop\Order\Item\Iface $item Order object
-	 */
-	protected function getOrder( $id )
-	{
-		$manager = \Aimeos\MShop::create( $this->context, 'order' );
-
-		$search = $manager->createSearch();
-		$expr = [
-			$search->compare( '==', 'order.id', $id ),
-			$search->compare( '==', 'order.base.service.code', $this->serviceItem->getCode() ),
-		];
-		$search->setConditions( $search->combine( '&&', $expr ) );
-
-		$result = $manager->searchItems( $search );
-
-		if( ( $item = reset( $result ) ) === false ) {
-			throw new \Aimeos\MShop\Service\Exception( sprintf( 'No order for ID "%1$s" found', $id ) );
-		}
-
-		return $item;
-	}
-
-
-	/**
-	 * Returns the base order which is equivalent to the basket.
-	 *
-	 * @param string $baseId Order base ID stored in the order item
+	 * @param string $id Order ID stored in the order item
 	 * @param integer $parts Bitmap of the basket parts that should be loaded
-	 * @return \Aimeos\MShop\Order\Item\Base\Iface Basket, optional with addresses, products, services and coupons
+	 * @return \Aimeos\MShop\Order\Item\Iface Basket, optional with addresses, products, services and coupons
 	 */
-	protected function getOrderBase( $baseId, $parts = \Aimeos\MShop\Order\Item\Base\Base::PARTS_SERVICE )
+	protected function getOrder( $id, $parts = \Aimeos\MShop\Order\Item\Base::PARTS_SERVICE )
 	{
-		return \Aimeos\MShop::create( $this->context, 'order/base' )->load( $baseId, $parts );
+		return \Aimeos\MShop::create( $this->context, 'order' )->load( $id, $parts );
 	}
 
 
@@ -464,29 +437,16 @@ abstract class Base
 
 
 	/**
-	 * Saves the base order which is equivalent to the basket and its dependent objects.
-	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $base Order base object with associated items
-	 * @param integer $parts Bitmap of the basket parts that should be stored
-	 * @return \Aimeos\MShop\Order\Item\Base\Iface Stored order base item
-	 */
-	protected function saveOrderBase( \Aimeos\MShop\Order\Item\Base\Iface $base, $parts = \Aimeos\MShop\Order\Item\Base\Base::PARTS_SERVICE )
-	{
-		return \Aimeos\MShop::create( $this->context, 'order/base' )->store( $base, $parts );
-	}
-
-
-	/**
 	 * Sets the attributes in the given service item.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Service\Iface $orderServiceItem Order service item that will be added to the basket
+	 * @param \Aimeos\MShop\Order\Item\Service\Iface $orderServiceItem Order service item that will be added to the basket
 	 * @param array $attributes Attribute key/value pairs entered by the customer during the checkout process
 	 * @param string $type Type of the configuration values (delivery or payment)
-	 * @return \Aimeos\MShop\Order\Item\Base\Service\Iface Modified order service item
+	 * @return \Aimeos\MShop\Order\Item\Service\Iface Modified order service item
 	 */
-	protected function setAttributes( \Aimeos\MShop\Order\Item\Base\Service\Iface $orderServiceItem, array $attributes, $type )
+	protected function setAttributes( \Aimeos\MShop\Order\Item\Service\Iface $orderServiceItem, array $attributes, $type )
 	{
-		$manager = \Aimeos\MShop::create( $this->context, 'order/base/service/attribute' );
+		$manager = \Aimeos\MShop::create( $this->context, 'order/service/attribute' );
 
 		foreach( $attributes as $key => $value )
 		{

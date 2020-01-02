@@ -13,7 +13,7 @@ namespace Aimeos\MShop\Coupon\Provider\Decorator;
 class BasketValuesTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
-	private $orderBase;
+	private $order;
 	private $couponItem;
 
 
@@ -30,8 +30,7 @@ class BasketValuesTest extends \PHPUnit\Framework\TestCase
 		$this->object->setObject( $this->object );
 
 		$orderManager = \Aimeos\MShop\Order\Manager\Factory::create( $context );
-		$orderBaseManager = $orderManager->getSubManager( 'base' );
-		$orderProductManager = $orderBaseManager->getSubManager( 'product' );
+		$orderProductManager = $orderManager->getSubManager( 'product' );
 
 		$productManager = \Aimeos\MShop\Product\Manager\Factory::create( $context );
 		$search = $productManager->createSearch();
@@ -51,15 +50,15 @@ class BasketValuesTest extends \PHPUnit\Framework\TestCase
 
 		$orderProducts['CNC']->setPrice( $price );
 
-		$this->orderBase = new \Aimeos\MShop\Order\Item\Base\Standard( $priceManager->createItem(), $context->getLocale() );
-		$this->orderBase->addProduct( $orderProducts['CNC'] );
+		$this->order = new \Aimeos\MShop\Order\Item\Standard( $priceManager->createItem(), $context->getLocale() );
+		$this->order->addProduct( $orderProducts['CNC'] );
 	}
 
 
 	protected function tearDown()
 	{
 		unset( $this->object );
-		unset( $this->orderBase );
+		unset( $this->order );
 		unset( $this->couponItem );
 	}
 
@@ -105,7 +104,7 @@ class BasketValuesTest extends \PHPUnit\Framework\TestCase
 		);
 
 		$this->couponItem->setConfig( $config );
-		$result = $this->object->isAvailable( $this->orderBase );
+		$result = $this->object->isAvailable( $this->order );
 
 		$this->assertTrue( $result );
 	}
@@ -119,7 +118,7 @@ class BasketValuesTest extends \PHPUnit\Framework\TestCase
 		);
 
 		$this->couponItem->setConfig( $config );
-		$result = $this->object->isAvailable( $this->orderBase );
+		$result = $this->object->isAvailable( $this->order );
 
 		$this->assertFalse( $result );
 	}
@@ -133,7 +132,7 @@ class BasketValuesTest extends \PHPUnit\Framework\TestCase
 		);
 
 		$this->couponItem->setConfig( $config );
-		$result = $this->object->isAvailable( $this->orderBase );
+		$result = $this->object->isAvailable( $this->order );
 
 		$this->assertFalse( $result );
 	}

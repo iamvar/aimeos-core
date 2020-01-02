@@ -22,15 +22,15 @@ class ProductPriceTest extends \PHPUnit\Framework\TestCase
 	{
 		$this->context = \TestHelperMShop::getContext();
 		$this->plugin = \Aimeos\MShop::create( $this->context, 'plugin' )->createItem();
-		$this->order = \Aimeos\MShop::create( $this->context, 'order/base' )->createItem()->off(); // remove event listeners
+		$this->order = \Aimeos\MShop::create( $this->context, 'order' )->createItem()->off(); // remove event listeners
 
-		$orderBaseProductManager = \Aimeos\MShop::create( $this->context, 'order/base/product' );
-		$search = $orderBaseProductManager->createSearch();
-		$search->setConditions( $search->compare( '==', 'order.base.product.prodcode', 'CNC' ) );
-		$orderProducts = $orderBaseProductManager->searchItems( $search );
+		$orderProductManager = \Aimeos\MShop::create( $this->context, 'order/product' );
+		$search = $orderProductManager->createSearch();
+		$search->setConditions( $search->compare( '==', 'order.product.prodcode', 'CNC' ) );
+		$orderProducts = $orderProductManager->searchItems( $search );
 
 		if( ( $orderProduct = reset( $orderProducts ) ) === false ) {
-			throw new \RuntimeException( 'No order base product item found.' );
+			throw new \RuntimeException( 'No order product item found.' );
 		}
 
 		$price = $orderProduct->getPrice();
@@ -83,7 +83,7 @@ class ProductPriceTest extends \PHPUnit\Framework\TestCase
 	public function testUpdateArticlePriceCorrect()
 	{
 		$this->plugin->setConfig( ['update' => true] );
-		$part = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+		$part = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 
 		$this->assertEquals( $part, $this->object->update( $this->order, 'check.after', $part ) );
 	}
@@ -104,7 +104,7 @@ class ProductPriceTest extends \PHPUnit\Framework\TestCase
 
 		$this->order->addProduct( $orderProduct, 0 );
 		$this->plugin->setConfig( array( 'update' => true ) );
-		$part = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+		$part = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 
 		$this->assertEquals( $part, $this->object->update( $this->order, 'check.after', $part ) );
 	}
@@ -120,7 +120,7 @@ class ProductPriceTest extends \PHPUnit\Framework\TestCase
 
 		try
 		{
-			$part = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+			$part = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 			$this->object->update( $this->order, 'check.after', $part );
 
 			$this->fail( 'Price changes not recognized' );
@@ -145,7 +145,7 @@ class ProductPriceTest extends \PHPUnit\Framework\TestCase
 
 		try
 		{
-			$part = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+			$part = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 			$this->object->update( $this->order, 'check.after', $part );
 
 			$this->fail( 'Price changes not recognized' );
@@ -163,7 +163,7 @@ class ProductPriceTest extends \PHPUnit\Framework\TestCase
 		$attribute = \Aimeos\MShop::create( $this->context, 'attribute' )
 			->findItem( 'xs', ['price'], 'product', 'size' );
 
-		$ordAttr = \Aimeos\MShop::create( $this->context, 'order/base/product/attribute' )->createItem()
+		$ordAttr = \Aimeos\MShop::create( $this->context, 'order/product/attribute' )->createItem()
 			->copyFrom( $attribute )->setQuantity( 2 );
 
 		$orderProduct = $this->order->getProduct( 0 )->setAttributeItems( [$ordAttr] );
@@ -171,7 +171,7 @@ class ProductPriceTest extends \PHPUnit\Framework\TestCase
 
 		try
 		{
-			$part = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+			$part = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 			$this->object->update( $this->order, 'check.after', $part );
 
 			$this->fail( 'Price changes not recognized' );
@@ -195,7 +195,7 @@ class ProductPriceTest extends \PHPUnit\Framework\TestCase
 
 		try
 		{
-			$part = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+			$part = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 			$this->object->update( $this->order, 'check.after', $part );
 
 			$this->fail( 'Price changes not recognized' );
@@ -214,9 +214,9 @@ class ProductPriceTest extends \PHPUnit\Framework\TestCase
 	{
 		$orderProduct = $this->order->getProduct( 0 );
 		$orderProduct = $orderProduct->setPrice( $orderProduct->getPrice()->setValue( 13.13 ) )
-			->setFlags( \Aimeos\MShop\Order\Item\Base\Product\Base::FLAG_IMMUTABLE );
+			->setFlags( \Aimeos\MShop\Order\Item\Product\Base::FLAG_IMMUTABLE );
 
-		$part = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+		$part = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 		$oldPrice = clone $this->order->getProduct( 0 )->getPrice();
 
 		$this->assertEquals( $part, $this->object->update( $this->order, 'check.after', $part ) );
@@ -231,7 +231,7 @@ class ProductPriceTest extends \PHPUnit\Framework\TestCase
 		$orderProduct = $this->order->getProduct( 0 );
 		$orderProduct->setPrice( $orderProduct->getPrice()->setValue( 13.13 ) );
 
-		$part = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+		$part = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 		$oldPrice = clone $this->order->getProduct( 0 )->getPrice();
 
 		$this->assertEquals( $part, $this->object->update( $this->order, 'check.after', $part ) );

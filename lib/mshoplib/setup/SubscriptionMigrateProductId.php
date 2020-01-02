@@ -44,9 +44,9 @@ class SubscriptionMigrateProductId extends \Aimeos\MW\Setup\Task\Base
 		$update = '
 			UPDATE "mshop_subscription"
 			SET "productid" = (
-				SELECT obp."prodid"
-				FROM "mshop_order_base_product" AS obp
-				WHERE "mshop_subscription"."ordprodid" = obp."id"
+				SELECT op."prodid"
+				FROM "mshop_order_product" AS op
+				WHERE "mshop_subscription"."ordprodid" = op."id"
 				LIMIT 1
 			) WHERE "productid" = \'\'
 		';

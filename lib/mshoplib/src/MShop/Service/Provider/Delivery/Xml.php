@@ -98,8 +98,8 @@ class Xml
 	 */
 	public function process( \Aimeos\MShop\Order\Item\Iface $order )
 	{
-		$baseItem = $this->getOrderBase( $order->getBaseId(), \Aimeos\MShop\Order\Item\Base\Base::PARTS_ALL );
-		$this->createFile( $this->createXml( [$order], [$baseItem->getId() => $baseItem] ) );
+		$baseItem = $this->getOrder( $order->getId(), \Aimeos\MShop\Order\Item\Base::PARTS_ALL );
+		$this->createFile( $this->createXml( [$order] ) );
 
 		return $order->setDeliveryStatus( \Aimeos\MShop\Order\Item\Base::STAT_PROGRESS );
 	}
@@ -113,8 +113,8 @@ class Xml
 	 */
 	public function processBatch( array $orders )
 	{
-		$baseItems = $this->getOrderBaseItems( $orders );
-		$this->createFile( $this->createXml( $orders, $baseItems ) );
+		$orders = $this->getOrderItems( $orders );
+		$this->createFile( $this->createXml( $orders ) );
 
 		foreach( $orders as $key => $order ) {
 			$orders[$key] = $order->setDeliveryStatus( \Aimeos\MShop\Order\Item\Base::STAT_PROGRESS );
@@ -195,36 +195,35 @@ class Xml
 	 * Creates the XML file for the given orders
 	 *
 	 * @param \Aimeos\MShop\Order\Item\Iface[] $orderItems List of order items to export
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface[] $baseItems Associative list of order base items to export
 	 * @return string Generated XML
 	 */
-	protected function createXml( array $orderItems, array $baseItems )
+	protected function createXml( array $orderItems )
 	{
 		$view = $this->getContext()->getView();
 		$template = $this->getConfigValue( 'template', 'service/provider/delivery/xml-body-standard' );
 
-		return $view->assign( ['orderItems' => $orderItems, 'baseItems' => $baseItems] )->render( $template );
+		return $view->assign( ['orderItems' => $orderItems] )->render( $template );
 	}
 
 
 	/**
-	 * Returns the order base items for the given orders
+	 * Returns the order items for the given orders
 	 *
 	 * @param \Aimeos\MShop\Order\Item\Iface[] $orderItems List of order items
-	 * @return \Aimeos\MShop\Order\Item\Base\Iface[] Associative list of IDs as keys and order base items as values
+	 * @return \Aimeos\MShop\Order\Item\Iface[] Associative list of IDs as keys and order items as values
 	 */
-	protected function getOrderBaseItems( array $orderItems )
+	protected function getOrderItems( array $orderItems )
 	{
 		$ids = [];
-		$ref = ['order/base/address', 'order/base/coupon', 'order/base/product', 'order/base/service'];
+		$ref = ['order/address', 'order/coupon', 'order/product', 'order/service'];
 
 		foreach( $orderItems as $item ) {
-			$ids[$item->getBaseId()] = null;
+			$ids[$item->getId()] = null;
 		}
 
-		$manager = \Aimeos\MShop::create( $this->getContext(), 'order/base' );
+		$manager = \Aimeos\MShop::create( $this->getContext(), 'order' );
 		$search = $manager->createSearch()->setSlice( 0, count( $ids ) );
-		$search->setConditions( $search->compare( '==', 'order.base.id', array_keys( $ids ) ) );
+		$search->setConditions( $search->compare( '==', 'order.id', array_keys( $ids ) ) );
 
 		return $manager->searchItems( $search, $ref );
 	}

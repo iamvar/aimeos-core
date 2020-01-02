@@ -82,7 +82,7 @@ class WeightTest extends \PHPUnit\Framework\TestCase
 			->method( 'isAvailable' )
 			->will( $this->returnValue( true ) );
 
-		$this->assertTrue( $this->object->isAvailable( $this->getOrderBaseItem() ) );
+		$this->assertTrue( $this->object->isAvailable( $this->getOrderItem() ) );
 	}
 
 
@@ -94,7 +94,7 @@ class WeightTest extends \PHPUnit\Framework\TestCase
 			->method( 'isAvailable' )
 			->will( $this->returnValue( true ) );
 
-		$this->assertTrue( $this->object->isAvailable( $this->getOrderBaseItem() ) );
+		$this->assertTrue( $this->object->isAvailable( $this->getOrderItem() ) );
 	}
 
 
@@ -102,7 +102,7 @@ class WeightTest extends \PHPUnit\Framework\TestCase
 	{
 		$this->servItem->setConfig( array( 'weight.min' => '15' ) );
 
-		$this->assertFalse( $this->object->isAvailable( $this->getOrderBaseItem() ) );
+		$this->assertFalse( $this->object->isAvailable( $this->getOrderItem() ) );
 	}
 
 
@@ -110,26 +110,25 @@ class WeightTest extends \PHPUnit\Framework\TestCase
 	{
 		$this->servItem->setConfig( array( 'weight.max' => '10' ) );
 
-		$this->assertFalse( $this->object->isAvailable( $this->getOrderBaseItem() ) );
+		$this->assertFalse( $this->object->isAvailable( $this->getOrderItem() ) );
 	}
 
 
 	/**
-	 * @return \Aimeos\MShop\Order\Item\Base\Iface
+	 * @return \Aimeos\MShop\Order\Item\Iface
 	 */
-	protected function getOrderBaseItem()
+	protected function getOrderItem()
 	{
 		$manager = \Aimeos\MShop::create( $this->context, 'order' );
 
 		$search = $manager->createSearch();
 		$search->setConditions( $search->compare( '==', 'order.datepayment', '2008-02-15 12:34:56' ) );
-		$result = $manager->searchItems( $search );
+		$result = $manager->searchItems( $search, ['order/product'] );
 
 		if( ( $item = reset( $result ) ) === false ) {
 			throw new \RuntimeException( 'No order item found' );
 		}
 
-		$baseManager = \Aimeos\MShop::create( $this->context, 'order/base' );
-		return $baseManager->load( $item->getBaseId() );
+		return $item;
 	}
 }

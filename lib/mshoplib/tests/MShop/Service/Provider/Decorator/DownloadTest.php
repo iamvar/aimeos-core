@@ -81,7 +81,7 @@ class DownloadTest extends \PHPUnit\Framework\TestCase
 			->method( 'isAvailable' )
 			->will( $this->returnValue( true ) );
 
-		$this->assertTrue( $this->object->isAvailable( $this->getOrderBaseItem() ) );
+		$this->assertTrue( $this->object->isAvailable( $this->getOrderItem() ) );
 	}
 
 
@@ -93,7 +93,7 @@ class DownloadTest extends \PHPUnit\Framework\TestCase
 			->method( 'isAvailable' )
 			->will( $this->returnValue( true ) );
 
-		$this->assertTrue( $this->object->isAvailable( $this->getOrderBaseItem() ) );
+		$this->assertTrue( $this->object->isAvailable( $this->getOrderItem() ) );
 	}
 
 
@@ -101,13 +101,13 @@ class DownloadTest extends \PHPUnit\Framework\TestCase
 	{
 		$this->servItem->setConfig( array( 'download.all' => '1' ) );
 
-		$this->assertFalse( $this->object->isAvailable( $this->getOrderBaseItem() ) );
+		$this->assertFalse( $this->object->isAvailable( $this->getOrderItem() ) );
 	}
 
 
 	public function testIsAvailableFailureNoArticle()
 	{
-		$manager = \Aimeos\MShop::create( $this->context, 'order/base' );
+		$manager = \Aimeos\MShop::create( $this->context, 'order' );
 		$this->servItem->setConfig( array( 'download.all' => '0' ) );
 
 		$this->assertFalse( $this->object->isAvailable( $manager->createItem() ) );
@@ -115,23 +115,22 @@ class DownloadTest extends \PHPUnit\Framework\TestCase
 
 
 	/**
-	 * Returns an order base item
+	 * Returns an order item
 	 *
-	 * @return \Aimeos\MShop\Order\Item\Base\Iface Order base item
+	 * @return \Aimeos\MShop\Order\Item\Iface Order item
 	 */
-	protected function getOrderBaseItem()
+	protected function getOrderItem()
 	{
 		$manager = \Aimeos\MShop::create( $this->context, 'order' );
 
 		$search = $manager->createSearch();
 		$search->setConditions( $search->compare( '==', 'order.datepayment', '2008-02-15 12:34:56' ) );
-		$result = $manager->searchItems( $search );
+		$result = $manager->searchItems( $search, ['order/product'] );
 
 		if( ( $item = reset( $result ) ) === false ) {
 			throw new \RuntimeException( 'No order item found' );
 		}
 
-		$baseManager = \Aimeos\MShop::create( $this->context, 'order/base' );
-		return $baseManager->load( $item->getBaseId() );
+		return $item;
 	}
 }

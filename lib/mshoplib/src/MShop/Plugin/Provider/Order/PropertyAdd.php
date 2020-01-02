@@ -56,7 +56,7 @@ class PropertyAdd
 	{
 		parent::__construct( $context, $item );
 
-		$this->orderAttrManager = \Aimeos\MShop::create( $context, 'order/base/product/attribute' );
+		$this->orderAttrManager = \Aimeos\MShop::create( $context, 'order/product/attribute' );
 	}
 
 
@@ -120,7 +120,7 @@ class PropertyAdd
 
 		if( !is_array( $value ) )
 		{
-			\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Base\Product\Iface::class, $value );
+			\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Product\Iface::class, $value );
 			return $this->addAttributes( $value, $this->getProductItems( [$value->getProductId()] ), $types );
 		}
 
@@ -128,7 +128,7 @@ class PropertyAdd
 
 		foreach( $value as $orderProduct )
 		{
-			\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Base\Product\Iface::class, $orderProduct );
+			\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Product\Iface::class, $orderProduct );
 			$list[] = $orderProduct->getProductId();
 		}
 
@@ -145,12 +145,12 @@ class PropertyAdd
 	/**
 	 * Adds the product properties as attribute items to the order product item
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Product\Iface $orderProduct Order product containing attributes
+	 * @param \Aimeos\MShop\Order\Item\Product\Iface $orderProduct Order product containing attributes
 	 * @param \Aimeos\MShop\Product\Item\Iface[] $products Product items with properties
 	 * @param string[] $types List of property types to add
-	 * @return \Aimeos\MShop\Order\Item\Base\Product\Iface Modified order product item
+	 * @return \Aimeos\MShop\Order\Item\Product\Iface Modified order product item
 	 */
-	protected function addAttributes( \Aimeos\MShop\Order\Item\Base\Product\Iface $orderProduct, array $products, array $types )
+	protected function addAttributes( \Aimeos\MShop\Order\Item\Product\Iface $orderProduct, array $products, array $types )
 	{
 		if( !isset( $products[$orderProduct->getProductId()] ) ) {
 			return;

@@ -7,12 +7,11 @@
 
 /* Available data:
  * - orderItems : List of order items
- * - baseItems : List of order base items
  */
 ?>
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 
 <orders>
-<?= $this->partial( 'service/provider/delivery/xml-item-standard', ['orderItems' => $this->orderItems, 'baseItems' => $this->baseItems] ) ?>
+<?= $this->partial( 'service/provider/delivery/xml-item-standard', ['orderItems' => $this->orderItems] ) ?>
 
 </orders>

@@ -340,8 +340,7 @@ class Standard extends Base
 	public function setTaxValue( $value )
 	{
 		$this->tax = $this->checkPrice( $value, $this->precision + 2 );
-		parent::setModified();
-		return $this;
+		return parent::setModified();
 	}
 
 

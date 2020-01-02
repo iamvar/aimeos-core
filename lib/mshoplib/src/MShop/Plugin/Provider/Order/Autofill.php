@@ -174,7 +174,7 @@ class Autofill
 	 */
 	public function update( \Aimeos\MW\Observer\Publisher\Iface $order, $action, $value = null )
 	{
-		\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Base\Iface::class, $order );
+		\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Iface::class, $order );
 
 		$context = $this->getContext();
 		$services = $order->getServices();
@@ -187,7 +187,7 @@ class Autofill
 			$orderManager = \Aimeos\MShop::create( $context, 'order' );
 
 			$search = $orderManager->createSearch();
-			$search->setConditions( $search->compare( '==', 'order.base.customerid', $userid ) );
+			$search->setConditions( $search->compare( '==', 'order.customerid', $userid ) );
 			$search->setSortations( array( $search->sort( '-', 'order.ctime' ) ) );
 			$search->setSlice( 0, 1 );
 
@@ -210,12 +210,12 @@ class Autofill
 	/**
 	 * Returns the order service item for the given type and code if available.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $order Basket of the customer
-	 * @param string $type Service type constant from \Aimeos\MShop\Order\Item\Base\Service\Base
+	 * @param \Aimeos\MShop\Order\Item\Iface $order Basket of the customer
+	 * @param string $type Service type constant from \Aimeos\MShop\Order\Item\Service\Base
 	 * @param string|null $code Service item code
-	 * @return \Aimeos\MShop\Order\Item\Base\Service\Iface|null Order service item if available or null otherwise
+	 * @return \Aimeos\MShop\Order\Item\Service\Iface|null Order service item if available or null otherwise
 	 */
-	protected function getServiceItem( \Aimeos\MShop\Order\Item\Base\Iface $order, $type, $code = null )
+	protected function getServiceItem( \Aimeos\MShop\Order\Item\Iface $order, $type, $code = null )
 	{
 		$context = $this->getContext();
 		$serviceManager = \Aimeos\MShop::create( $context, 'service' );
@@ -242,7 +242,7 @@ class Autofill
 
 			if( $provider->isAvailable( $order ) === true )
 			{
-				return \Aimeos\MShop::create( $context, 'order/base/service' )->createItem()
+				return \Aimeos\MShop::create( $context, 'order/service' )->createItem()
 					->copyFrom( $item )->setPrice( $provider->calcPrice( $order ) );
 			}
 		}
@@ -252,18 +252,18 @@ class Autofill
 	/**
 	 * Adds the addresses from the given order item to the basket.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $order Basket object
+	 * @param \Aimeos\MShop\Order\Item\Iface $order Basket object
 	 * @param \Aimeos\MShop\Order\Item\Iface $item Existing order to fetch the addresses from
 	 */
-	protected function setAddresses( \Aimeos\MShop\Order\Item\Base\Iface $order, \Aimeos\MShop\Order\Item\Iface $item )
+	protected function setAddresses( \Aimeos\MShop\Order\Item\Iface $order, \Aimeos\MShop\Order\Item\Iface $item )
 	{
 		$addresses = $order->getAddresses();
 
 		if( empty( $addresses ) && (bool) $this->getConfigValue( 'orderaddress', true ) === true )
 		{
-			$manager = \Aimeos\MShop::create( $this->getContext(), 'order/base/address' );
+			$manager = \Aimeos\MShop::create( $this->getContext(), 'order/address' );
 			$search = $manager->createSearch();
-			$search->setConditions( $search->compare( '==', 'order.base.address.baseid', $item->getBaseId() ) );
+			$search->setConditions( $search->compare( '==', 'order.address.orderid', $item->getId() ) );
 
 			foreach( $manager->searchItems( $search ) as $address ) {
 				$addresses[$address->getType()][] = $address;
@@ -277,18 +277,18 @@ class Autofill
 	/**
 	 * Adds the services from the given order item to the basket.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $order Basket object
+	 * @param \Aimeos\MShop\Order\Item\Iface $order Basket object
 	 * @param \Aimeos\MShop\Order\Item\Iface $item Existing order to fetch the services from
 	 */
-	protected function setServices( \Aimeos\MShop\Order\Item\Base\Iface $order, \Aimeos\MShop\Order\Item\Iface $item )
+	protected function setServices( \Aimeos\MShop\Order\Item\Iface $order, \Aimeos\MShop\Order\Item\Iface $item )
 	{
 		$services = $order->getServices();
 
 		if( empty( $services ) && $this->getConfigValue( 'orderservice', true ) == true )
 		{
-			$manager = \Aimeos\MShop::create( $this->getContext(), 'order/base/service' );
+			$manager = \Aimeos\MShop::create( $this->getContext(), 'order/service' );
 			$search = $manager->createSearch();
-			$search->setConditions( $search->compare( '==', 'order.base.service.baseid', $item->getBaseId() ) );
+			$search->setConditions( $search->compare( '==', 'order.service.orderid', $item->getId() ) );
 
 			foreach( $manager->searchItems( $search ) as $service )
 			{
@@ -307,13 +307,13 @@ class Autofill
 	/**
 	 * Adds the default addresses to the basket if they are not available.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $order Basket object
+	 * @param \Aimeos\MShop\Order\Item\Iface $order Basket object
 	 */
-	protected function setAddressDefault( \Aimeos\MShop\Order\Item\Base\Iface $order )
+	protected function setAddressDefault( \Aimeos\MShop\Order\Item\Iface $order )
 	{
 		$context = $this->getContext();
 		$addresses = $order->getAddresses();
-		$type = \Aimeos\MShop\Order\Item\Base\Address\Base::TYPE_PAYMENT;
+		$type = \Aimeos\MShop\Order\Item\Address\Base::TYPE_PAYMENT;
 
 		if( $context->getUserId() !== null && !isset( $addresses[$type] )
 			&& (bool) $this->getConfigValue( 'address', false ) === true
@@ -321,7 +321,7 @@ class Autofill
 			$address = \Aimeos\MShop::create( $context, 'customer' )
 				->getItem( $context->getUserId() )->getPaymentAddress();
 
-			$addrItem = \Aimeos\MShop::create( $context, 'order/base/address' )
+			$addrItem = \Aimeos\MShop::create( $context, 'order/address' )
 				->createItem()->copyFrom( $address );
 
 			$order->addAddress( $addrItem, $type );
@@ -332,11 +332,11 @@ class Autofill
 	/**
 	 * Adds the default services to the basket if they are not available.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $order Basket object
+	 * @param \Aimeos\MShop\Order\Item\Iface $order Basket object
 	 */
-	protected function setServicesDefault( \Aimeos\MShop\Order\Item\Base\Iface $order )
+	protected function setServicesDefault( \Aimeos\MShop\Order\Item\Iface $order )
 	{
-		$type = \Aimeos\MShop\Order\Item\Base\Service\Base::TYPE_DELIVERY;
+		$type = \Aimeos\MShop\Order\Item\Service\Base::TYPE_DELIVERY;
 
 		if( $order->getService( $type ) === [] && (bool) $this->getConfigValue( 'delivery', false ) === true
 			&& ( ( $item = $this->getServiceItem( $order, $type, $this->getConfigValue( 'deliverycode' ) ) ) !== null
@@ -346,7 +346,7 @@ class Autofill
 		}
 
 
-		$type = \Aimeos\MShop\Order\Item\Base\Service\Base::TYPE_PAYMENT;
+		$type = \Aimeos\MShop\Order\Item\Service\Base::TYPE_PAYMENT;
 
 		if( $order->getService( $type ) === [] && (bool) $this->getConfigValue( 'payment', false ) === true
 			&& ( ( $item = $this->getServiceItem( $order, $type, $this->getConfigValue( 'paymentcode' ) ) ) !== null

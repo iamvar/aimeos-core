@@ -23,14 +23,14 @@ class Example
 	implements \Aimeos\MShop\Coupon\Provider\Decorator\Iface
 {
 	/**
-	 * Updates the result of a coupon to the order base instance.
+	 * Updates the result of a coupon to the order instance.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $base Basic order of the customer
+	 * @param \Aimeos\MShop\Order\Item\Iface $order Basic order of the customer
 	 * @return \Aimeos\MShop\Coupon\Provider\Iface Provider object for method chaining
 	 */
-	public function update( \Aimeos\MShop\Order\Item\Base\Iface $base )
+	public function update( \Aimeos\MShop\Order\Item\Iface $order )
 	{
-		$this->getProvider()->update( $base );
+		$this->getProvider()->update( $order );
 		return $this;
 	}
 
@@ -38,9 +38,9 @@ class Example
 	/**
 	 * Tests if a coupon should be granted
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $base
+	 * @param \Aimeos\MShop\Order\Item\Iface $order
 	 */
-	public function isAvailable( \Aimeos\MShop\Order\Item\Base\Iface $base )
+	public function isAvailable( \Aimeos\MShop\Order\Item\Iface $order )
 	{
 		return true;
 	}

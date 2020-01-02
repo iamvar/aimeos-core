@@ -61,12 +61,12 @@ class FreeShipping
 
 
 	/**
-	 * Updates the result of a coupon to the order base instance.
+	 * Updates the result of a coupon to the order instance.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $base Basic order of the customer
+	 * @param \Aimeos\MShop\Order\Item\Iface $order Basic order of the customer
 	 * @return \Aimeos\MShop\Coupon\Provider\Iface Provider object for method chaining
 	 */
-	public function update( \Aimeos\MShop\Order\Item\Base\Iface $base )
+	public function update( \Aimeos\MShop\Order\Item\Iface $order )
 	{
 		if( ( $prodcode = $this->getConfigValue( 'freeshipping.productcode' ) ) === null )
 		{
@@ -78,13 +78,13 @@ class FreeShipping
 		$orderProduct = $this->createProduct( $prodcode );
 		$price = $orderProduct->getPrice()->clear();
 
-		foreach( $base->getService( \Aimeos\MShop\Order\Item\Base\Service\Base::TYPE_DELIVERY ) as $service )
+		foreach( $order->getService( \Aimeos\MShop\Order\Item\Service\Base::TYPE_DELIVERY ) as $service )
 		{
 			$price = $price->setRebate( $price->getRebate() + $service->getPrice()->getCosts() )
 				->setCosts( $price->getCosts() - $service->getPrice()->getCosts() );
 		}
 
-		$base->setCoupon( $this->getCode(), [$orderProduct->setPrice( $price )] );
+		$order->setCoupon( $this->getCode(), [$orderProduct->setPrice( $price )] );
 		return $this;
 	}
 }

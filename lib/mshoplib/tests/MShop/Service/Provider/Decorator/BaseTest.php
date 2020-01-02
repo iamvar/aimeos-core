@@ -26,7 +26,7 @@ class BaseTest extends \PHPUnit\Framework\TestCase
 		$result = $servManager->searchItems( $search, array( 'price' ) );
 
 		if( ( $item = reset( $result ) ) === false ) {
-			throw new \RuntimeException( 'No order base item found' );
+			throw new \RuntimeException( 'No order item found' );
 		}
 
 		$this->mock = $this->getMockBuilder( \Aimeos\MShop\Service\Provider\Payment\PrePay::class )
@@ -55,7 +55,7 @@ class BaseTest extends \PHPUnit\Framework\TestCase
 
 	public function testCalcPrice()
 	{
-		$item = \Aimeos\MShop\Order\Manager\Factory::create( $this->context )->getSubManager( 'base' )->createItem();
+		$item = \Aimeos\MShop\Order\Manager\Factory::create( $this->context )->createItem();
 
 		$this->mock->expects( $this->once() )->method( 'calcPrice' )->will( $this->returnValue( $item->getPrice() ) );
 
@@ -89,7 +89,7 @@ class BaseTest extends \PHPUnit\Framework\TestCase
 
 	public function testGetConfigFE()
 	{
-		$item = \Aimeos\MShop\Order\Manager\Factory::create( $this->context )->getSubManager( 'base' )->createItem();
+		$item = \Aimeos\MShop\Order\Manager\Factory::create( $this->context )->createItem();
 
 		$this->mock->expects( $this->once() )->method( 'getConfigFE' )->will( $this->returnValue( [] ) );
 
@@ -107,7 +107,7 @@ class BaseTest extends \PHPUnit\Framework\TestCase
 
 	public function testIsAvailable()
 	{
-		$item = \Aimeos\MShop\Order\Manager\Factory::create( $this->context )->getSubManager( 'base' )->createItem();
+		$item = \Aimeos\MShop\Order\Manager\Factory::create( $this->context )->createItem();
 
 		$this->mock->expects( $this->once() )->method( 'isAvailable' )->will( $this->returnValue( true ) );
 
@@ -185,7 +185,7 @@ class BaseTest extends \PHPUnit\Framework\TestCase
 	public function testSetConfigFE()
 	{
 		$item = \Aimeos\MShop\Order\Manager\Factory::create( $this->context )
-			->getSubManager( 'base' )->getSubManager( 'service' )->createItem();
+			->getSubManager( 'service' )->createItem();
 
 		$this->mock->expects( $this->once() )->method( 'setConfigFE' );
 

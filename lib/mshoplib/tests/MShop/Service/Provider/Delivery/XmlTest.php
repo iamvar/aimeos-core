@@ -76,7 +76,7 @@ class XmlTest extends \PHPUnit\Framework\TestCase
 
 		$this->assertEquals( \Aimeos\MShop\Order\Item\Base::STAT_PROGRESS, $order->getDeliveryStatus() );
 		$this->assertEquals( '2008-02-15 12:34:56', $xml->orderitem[0]->{'order.datepayment'} );
-		$this->assertEquals( 'unittest', $xml->orderitem[0]->{'order.base.sitecode'} );
+		$this->assertEquals( 'unittest', $xml->orderitem[0]->{'order.sitecode'} );
 		$this->assertEquals( 'payment', $xml->orderitem[0]->address->addressitem[0]['type'] );
 		$this->assertEquals( 0, (string) $xml->orderitem[0]->address->addressitem[0]['position'] );
 		$this->assertEquals( 1, (string) $xml->orderitem[0]->product->productitem[0]['position'] );
@@ -97,7 +97,7 @@ class XmlTest extends \PHPUnit\Framework\TestCase
 		$this->assertEquals( 1, count( $orders ) );
 		$this->assertEquals( \Aimeos\MShop\Order\Item\Base::STAT_PROGRESS, current( $orders )->getDeliveryStatus() );
 		$this->assertEquals( '2008-02-15 12:34:56', $xml->orderitem[0]->{'order.datepayment'} );
-		$this->assertEquals( 'unittest', $xml->orderitem[0]->{'order.base.sitecode'} );
+		$this->assertEquals( 'unittest', $xml->orderitem[0]->{'order.sitecode'} );
 		$this->assertEquals( 'payment', $xml->orderitem[0]->address->addressitem[0]['type'] );
 		$this->assertEquals( 0, (string) $xml->orderitem[0]->address->addressitem[0]['position'] );
 		$this->assertEquals( 1, (string) $xml->orderitem[0]->product->productitem[0]['position'] );
@@ -113,8 +113,12 @@ class XmlTest extends \PHPUnit\Framework\TestCase
 	{
 		\Aimeos\MShop::cache( true );
 
+		$price = \Aimeos\MShop::create( $this->context, 'price' )->createItem();
+		$locale = \Aimeos\MShop::create( $this->context, 'locale' )->createItem();
+
 		$itemMock = $this->getMockBuilder( \Aimeos\MShop\Order\Item\Standard::class )
 			->setMethods( ['setDeliveryStatus', 'setPaymentStatus', 'setDateDelivery', 'setDatePayment'] )
+			->setConstructorArgs( [$price, $locale] )
 			->getMock();
 
 		$itemMock->expects( $this->once() )->method( 'setDeliveryStatus' )->will( $this->returnSelf() );

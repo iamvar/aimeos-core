@@ -13,11 +13,15 @@ namespace Aimeos\MShop\Order\Item;
 class StandardTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
+	private $locale;
 	private $values;
+	private $price;
 
 
 	protected function setUp()
 	{
+		$context = \TestHelperMShop::getContext();
+
 		$this->values = array(
 			'order.id' => 15,
 			'order.siteid' => 99,
@@ -27,19 +31,23 @@ class StandardTest extends \PHPUnit\Framework\TestCase
 			'order.datepayment' => '2004-12-01 12:34:56',
 			'order.datedelivery' => '2004-01-03 12:34:56',
 			'order.relatedid' => 1,
-			'order.baseid' => 4,
+			'order.customerid' => 'testuser',
+			'order.customerref' => 'ABC-1234',
+			'order.comment' => 'this is a comment from unittest',
 			'order.mtime' => '2011-01-01 00:00:02',
 			'order.ctime' => '2011-01-01 00:00:01',
 			'order.editor' => 'unitTestUser'
 		);
 
-		$this->object = new \Aimeos\MShop\Order\Item\Standard( $this->values );
+		$this->price = \Aimeos\MShop\Price\Manager\Factory::create( $context )->createItem();
+		$this->locale = \Aimeos\MShop\Locale\Manager\Factory::create( $context )->createItem();
+		$this->object = new \Aimeos\MShop\Order\Item\Standard( $this->price, $this->locale, $this->values );
 	}
 
 
 	protected function tearDown()
 	{
-		unset( $this->object );
+		unset( $this->object, $this->locale, $this->price );
 	}
 
 
@@ -68,22 +76,6 @@ class StandardTest extends \PHPUnit\Framework\TestCase
 	public function testGetSiteId()
 	{
 		$this->assertEquals( 99, $this->object->getSiteId() );
-	}
-
-
-	public function testGetBaseId()
-	{
-		$this->assertEquals( $this->values['order.baseid'], $this->object->getBaseId() );
-	}
-
-
-	public function testSetBaseId()
-	{
-		$return = $this->object->setBaseId( 15 );
-
-		$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Iface::class, $return );
-		$this->assertEquals( 15, $this->object->getBaseId() );
-		$this->assertTrue( $this->object->isModified() );
 	}
 
 
@@ -189,6 +181,83 @@ class StandardTest extends \PHPUnit\Framework\TestCase
 	}
 
 
+	public function testGetCustomerId()
+	{
+		$this->assertEquals( 'testuser', $this->object->getCustomerId() );
+	}
+
+
+	public function testSetCustomerId()
+	{
+		$return = $this->object->setCustomerId( '44' );
+
+		$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Iface::class, $return );
+		$this->assertEquals( '44', $this->object->getCustomerId() );
+		$this->assertTrue( $this->object->isModified() );
+	}
+
+
+	public function testGetCustomerReference()
+	{
+		$this->assertEquals( 'ABC-1234', $this->object->getCustomerReference() );
+	}
+
+
+	public function testSetCustomerReference()
+	{
+		$return = $this->object->setCustomerReference( 'XYZ-9876' );
+
+		$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Iface::class, $return );
+		$this->assertEquals( 'XYZ-9876', $this->object->getCustomerReference() );
+		$this->assertTrue( $this->object->isModified() );
+	}
+
+
+	public function testGetLocale()
+	{
+		$this->assertEquals( $this->locale, $this->object->getLocale() );
+	}
+
+
+	public function testSetLocale()
+	{
+		$locale = \Aimeos\MShop\Locale\Manager\Factory::create( \TestHelperMShop::getContext() )->createItem();
+		$return = $this->object->setLocale( $locale );
+
+		$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Iface::class, $return );
+		$this->assertEquals( $locale, $this->object->getLocale() );
+		$this->assertTrue( $this->object->isModified() );
+	}
+
+
+	public function testGetPrice()
+	{
+		$priceItem = $this->object->getPrice();
+
+		$this->assertEquals( $priceItem->getCurrencyId(), 'EUR' );
+		$this->assertEquals( $priceItem->getTaxRate(), '0.00' );
+		$this->assertEquals( $priceItem->getRebate(), '0.00' );
+		$this->assertEquals( $priceItem->getCosts(), '0.00' );
+		$this->assertEquals( $priceItem->getValue(), '0.00' );
+	}
+
+
+	public function testGetComment()
+	{
+		$this->assertEquals( 'this is a comment from unittest', $this->object->getComment() );
+	}
+
+
+	public function testSetComment()
+	{
+		$return = $this->object->setComment( 'New unit test comment' );
+
+		$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Iface::class, $return );
+		$this->assertEquals( 'New unit test comment', $this->object->getComment() );
+		$this->assertTrue( $this->object->isModified() );
+	}
+
+
 	public function testGetTimeModified()
 	{
 		$this->assertEquals( '2011-01-01 00:00:02', $this->object->getTimeModified() );
@@ -215,15 +284,18 @@ class StandardTest extends \PHPUnit\Framework\TestCase
 
 	public function testFromArray()
 	{
-		$item = new \Aimeos\MShop\Order\Item\Standard();
+		$item = new \Aimeos\MShop\Order\Item\Standard( $this->price, $this->locale );
 
 		$list = $entries = array(
 			'order.id' => 1,
 			'order.type' => \Aimeos\MShop\Order\Item\Base::TYPE_WEB,
-			'order.baseid' => 2,
 			'order.relatedid' => 3,
 			'order.statusdelivery' => 4,
 			'order.statuspayment' => 5,
+			'order.customerref' => 'testref',
+			'order.comment' => 'test comment',
+			'order.languageid' => 'de',
+			'order.customerid' => 3,
 			'order.datepayment' => '2000-01-01 00:00:00',
 			'order.datedelivery' => '2001-01-01 00:00:00',
 		);
@@ -233,12 +305,15 @@ class StandardTest extends \PHPUnit\Framework\TestCase
 		$this->assertEquals( [], $entries );
 		$this->assertEquals( $list['order.id'], $item->getId() );
 		$this->assertEquals( $list['order.type'], $item->getType() );
-		$this->assertEquals( $list['order.baseid'], $item->getBaseId() );
 		$this->assertEquals( $list['order.relatedid'], $item->getRelatedId() );
 		$this->assertEquals( $list['order.statusdelivery'], $item->getDeliveryStatus() );
 		$this->assertEquals( $list['order.statuspayment'], $item->getPaymentStatus() );
 		$this->assertEquals( $list['order.datepayment'], $item->getDatePayment() );
 		$this->assertEquals( $list['order.datedelivery'], $item->getDateDelivery() );
+		$this->assertEquals( $list['order.customerid'], $item->getCustomerId() );
+		$this->assertEquals( $list['order.languageid'], $item->getLocale()->getLanguageId() );
+		$this->assertEquals( $list['order.customerref'], $item->getCustomerReference() );
+		$this->assertEquals( $list['order.comment'], $item->getComment() );
 	}
 
 
@@ -254,11 +329,19 @@ class StandardTest extends \PHPUnit\Framework\TestCase
 		$this->assertEquals( $this->object->getPaymentStatus(), $list['order.statuspayment'] );
 		$this->assertEquals( $this->object->getDatePayment(), $list['order.datepayment'] );
 		$this->assertEquals( $this->object->getDateDelivery(), $list['order.datedelivery'] );
-		$this->assertEquals( $this->object->getBaseId(), $list['order.baseid'] );
 		$this->assertEquals( $this->object->getRelatedId(), $list['order.relatedid'] );
+		$this->assertEquals( $this->object->getCustomerId(), $list['order.customerid'] );
+		$this->assertEquals( $this->object->getLocale()->getLanguageId(), $list['order.languageid'] );
+		$this->assertEquals( $this->object->getCustomerReference(), $list['order.customerref'] );
+		$this->assertEquals( $this->object->getComment(), $list['order.comment'] );
 		$this->assertEquals( $this->object->getTimeModified(), $list['order.mtime'] );
 		$this->assertEquals( $this->object->getTimeCreated(), $list['order.ctime'] );
 		$this->assertEquals( $this->object->getEditor(), $list['order.editor'] );
+
+		$this->assertEquals( $price->getValue(), $list['order.price'] );
+		$this->assertEquals( $price->getCosts(), $list['order.costs'] );
+		$this->assertEquals( $price->getRebate(), $list['order.rebate'] );
+		$this->assertEquals( $price->getCurrencyId(), $list['order.currencyid'] );
 	}
 
 

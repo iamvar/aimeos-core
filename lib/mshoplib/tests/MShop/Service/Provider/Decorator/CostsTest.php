@@ -33,7 +33,7 @@ class CostsTest extends \PHPUnit\Framework\TestCase
 			->disableOriginalConstructor()->getMock();
 
 		$orderManager = \Aimeos\MShop\Order\Manager\Factory::create( $this->context );
-		$this->basket = $orderManager->getSubManager( 'base' )->createItem()->off(); // remove plugins
+		$this->basket = $orderManager->createItem()->off(); // remove plugins
 
 		$this->object = new \Aimeos\MShop\Service\Provider\Decorator\Costs( $this->mockProvider, $this->context, $this->servItem );
 	}
@@ -101,13 +101,13 @@ class CostsTest extends \PHPUnit\Framework\TestCase
 	/**
 	 * Returns an order product item
 	 *
-	 * @return \Aimeos\MShop\Order\Item\Base\Product\Iface Order product item
+	 * @return \Aimeos\MShop\Order\Item\Product\Iface Order product item
 	 */
 	protected function getOrderProduct()
 	{
 		$priceManager = \Aimeos\MShop::create( $this->context, 'price' );
 		$productManager = \Aimeos\MShop::create( $this->context, 'product' );
-		$orderProductManager = \Aimeos\MShop::create( $this->context, 'order/base/product' );
+		$orderProductManager = \Aimeos\MShop::create( $this->context, 'order/product' );
 
 		$price = $priceManager->createItem();
 		$price->setValue( '20.00' );

@@ -62,10 +62,10 @@ class Category
 	/**
 	 * Checks for requirements.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $base Basic order of the customer
+	 * @param \Aimeos\MShop\Order\Item\Iface $order Basic order of the customer
 	 * @return boolean True if the requirements are met, false if not
 	 */
-	public function isAvailable( \Aimeos\MShop\Order\Item\Base\Iface $base )
+	public function isAvailable( \Aimeos\MShop\Order\Item\Iface $order )
 	{
 		if( ( $value = $this->getConfigValue( 'category.code' ) ) !== null )
 		{
@@ -73,7 +73,7 @@ class Category
 			$search = $manager->createSearch( true )->setSlice( 0, 1 );
 			$expr = [];
 
-			foreach( $base->getProducts() as $product )
+			foreach( $order->getProducts() as $product )
 			{
 				$func = $search->createFunction( 'catalog:has', ['product', 'default', $product->getProductId()] );
 				$expr[] = $search->compare( '!=', $func, null );
@@ -90,6 +90,6 @@ class Category
 			}
 		}
 
-		return parent::isAvailable( $base );
+		return parent::isAvailable( $order );
 	}
 }

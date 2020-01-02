@@ -22,14 +22,14 @@ class None
 	implements \Aimeos\MShop\Coupon\Provider\Iface, \Aimeos\MShop\Coupon\Provider\Factory\Iface
 {
 	/**
-	 * Updates the result of a coupon to the order base instance.
+	 * Updates the result of a coupon to the order instance.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $base Basic order of the customer
+	 * @param \Aimeos\MShop\Order\Item\Iface $order Basic order of the customer
 	 * @return \Aimeos\MShop\Coupon\Provider\Iface Provider object for method chaining
 	 */
-	public function update( \Aimeos\MShop\Order\Item\Base\Iface $base )
+	public function update( \Aimeos\MShop\Order\Item\Iface $order )
 	{
-		$base->setCoupon( $this->getCode(), [] );
+		$order->setCoupon( $this->getCode(), [] );
 		return $this;
 	}
 }

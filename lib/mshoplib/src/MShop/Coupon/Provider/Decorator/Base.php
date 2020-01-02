@@ -42,17 +42,17 @@ abstract class Base
 
 
 	/**
-	 * Updates the result of a coupon to the order base instance.
+	 * Updates the result of a coupon to the order instance.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $base Basic order of the customer
+	 * @param \Aimeos\MShop\Order\Item\Iface $order Basic order of the customer
 	 * @return \Aimeos\MShop\Coupon\Provider\Iface Provider object for method chaining
 	 */
-	public function update( \Aimeos\MShop\Order\Item\Base\Iface $base )
+	public function update( \Aimeos\MShop\Order\Item\Iface $order )
 	{
-		if( $this->isAvailable( $base ) ) {
-			$this->provider->update( $base );
+		if( $this->isAvailable( $order ) ) {
+			$this->provider->update( $order );
 		} else {
-			$base->setCoupon( $this->getCode(), [] );
+			$order->setCoupon( $this->getCode(), [] );
 		}
 
 		return $this;
@@ -62,12 +62,12 @@ abstract class Base
 	/**
 	 * Tests if a coupon should be granted.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $base Basic order of the customer
+	 * @param \Aimeos\MShop\Order\Item\Iface $order Basic order of the customer
 	 * @return boolean True of coupon can be granted, false if not
 	 */
-	public function isAvailable( \Aimeos\MShop\Order\Item\Base\Iface $base )
+	public function isAvailable( \Aimeos\MShop\Order\Item\Iface $order )
 	{
-		return $this->provider->isAvailable( $base );
+		return $this->provider->isAvailable( $order );
 	}
 
 

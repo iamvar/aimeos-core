@@ -87,7 +87,7 @@ class QuantityTest extends \PHPUnit\Framework\TestCase
 
 		$this->servItem->setConfig( array( 'quantity.packagecosts' => '1' ) );
 
-		$this->assertEquals( '14.00', $this->object->calcPrice( $this->getOrderBaseItem( '2008-02-15 12:34:56' ) )->getCosts() );
+		$this->assertEquals( '14.00', $this->object->calcPrice( $this->getOrderItem( '2008-02-15 12:34:56' ) )->getCosts() );
 	}
 
 
@@ -102,7 +102,7 @@ class QuantityTest extends \PHPUnit\Framework\TestCase
 
 		$this->servItem->setConfig( array( 'quantity.packagecosts' => '1.0' ) );
 
-		$this->assertEquals( '4.00', $this->object->calcPrice( $this->getOrderBaseItem( '2009-03-18 16:14:32' ) )->getCosts() );
+		$this->assertEquals( '4.00', $this->object->calcPrice( $this->getOrderItem( '2009-03-18 16:14:32' ) )->getCosts() );
 	}
 
 
@@ -117,7 +117,7 @@ class QuantityTest extends \PHPUnit\Framework\TestCase
 
 		$this->servItem->setConfig( array( 'quantity.packagesize' => '5', 'quantity.packagecosts' => '2.50' ) );
 
-		$this->assertEquals( '7.50', $this->object->calcPrice( $this->getOrderBaseItem( '2008-02-15 12:34:56' ) )->getCosts() );
+		$this->assertEquals( '7.50', $this->object->calcPrice( $this->getOrderItem( '2008-02-15 12:34:56' ) )->getCosts() );
 	}
 
 
@@ -132,26 +132,25 @@ class QuantityTest extends \PHPUnit\Framework\TestCase
 
 		$this->servItem->setConfig( array( 'quantity.packagesize' => '7', 'quantity.packagecosts' => '5.00' ) );
 
-		$this->assertEquals( '10.00', $this->object->calcPrice( $this->getOrderBaseItem( '2008-02-15 12:34:56' ) )->getCosts() );
+		$this->assertEquals( '10.00', $this->object->calcPrice( $this->getOrderItem( '2008-02-15 12:34:56' ) )->getCosts() );
 	}
 
 
 	/**
-	 * @return \Aimeos\MShop\Order\Item\Base\Iface
+	 * @return \Aimeos\MShop\Order\Item\Iface
 	 */
-	protected function getOrderBaseItem( $paydate )
+	protected function getOrderItem( $paydate )
 	{
 		$manager = \Aimeos\MShop::create( $this->context, 'order' );
 
 		$search = $manager->createSearch();
 		$search->setConditions( $search->compare( '==', 'order.datepayment', $paydate ) );
-		$result = $manager->searchItems( $search );
+		$result = $manager->searchItems( $search, ['order/product'] );
 
 		if( ( $item = reset( $result ) ) === false ) {
 			throw new \RuntimeException( 'No order item found' );
 		}
 
-		$baseManager = \Aimeos\MShop::create( $this->context, 'order/base' );
-		return $baseManager->load( $item->getBaseId() );
+		return $item;
 	}
 }

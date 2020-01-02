@@ -32,7 +32,7 @@ class ProductFreeOptionsTest extends \PHPUnit\Framework\TestCase
 
 	public function testRegister()
 	{
-		$this->object->register( \Aimeos\MShop::create( $this->context, 'order/base' )->createItem() );
+		$this->object->register( \Aimeos\MShop::create( $this->context, 'order' )->createItem() );
 	}
 
 
@@ -41,9 +41,9 @@ class ProductFreeOptionsTest extends \PHPUnit\Framework\TestCase
 		$prodManager = \Aimeos\MShop::create( $this->context, 'product' );
 		$attrManager = \Aimeos\MShop::create( $this->context, 'attribute' );
 
-		$basket = \Aimeos\MShop::create( $this->context, 'order/base' )->createItem()->off();
-		$product = \Aimeos\MShop::create( $this->context, 'order/base/product' )->createItem();
-		$attribute = \Aimeos\MShop::create( $this->context, 'order/base/product/attribute' )->createItem();
+		$basket = \Aimeos\MShop::create( $this->context, 'order' )->createItem()->off();
+		$product = \Aimeos\MShop::create( $this->context, 'order/product' )->createItem();
+		$attribute = \Aimeos\MShop::create( $this->context, 'order/product/attribute' )->createItem();
 
 		$attribute = $attribute->setQuantity( 2 )->setCode( 'size' )->setType( 'config' )
 			->setAttributeId( $attrManager->findItem( 'xs', [], 'product', 'size' )->getId() );

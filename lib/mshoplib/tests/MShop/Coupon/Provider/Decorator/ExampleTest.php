@@ -12,7 +12,7 @@ namespace Aimeos\MShop\Coupon\Provider\Decorator;
 class ExampleTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
-	private $orderBase;
+	private $order;
 
 
 	protected function setUp()
@@ -20,8 +20,7 @@ class ExampleTest extends \PHPUnit\Framework\TestCase
 		$context = \TestHelperMShop::getContext();
 		$item = \Aimeos\MShop\Coupon\Manager\Factory::create( $context )->createItem();
 
-		$this->orderBase = \Aimeos\MShop\Order\Manager\Factory::create( $context )
-			->getSubmanager( 'base' )->createItem()->off();
+		$this->order = \Aimeos\MShop\Order\Manager\Factory::create( $context )->createItem()->off();
 
 		$provider = new \Aimeos\MShop\Coupon\Provider\Example( $context, $item, 'abcd' );
 		$this->object = new \Aimeos\MShop\Coupon\Provider\Decorator\Example( $provider, $context, $item, 'abcd' );
@@ -32,13 +31,13 @@ class ExampleTest extends \PHPUnit\Framework\TestCase
 	protected function tearDown()
 	{
 		unset( $this->object );
-		unset( $this->orderBase );
+		unset( $this->order );
 	}
 
 
 	public function testIsAvailable()
 	{
-		$this->assertTrue( $this->object->isAvailable( $this->orderBase ) );
+		$this->assertTrue( $this->object->isAvailable( $this->order ) );
 	}
 
 
@@ -50,6 +49,6 @@ class ExampleTest extends \PHPUnit\Framework\TestCase
 
 	public function testUpdate()
 	{
-		$this->object->update( $this->orderBase );
+		$this->object->update( $this->order );
 	}
 }

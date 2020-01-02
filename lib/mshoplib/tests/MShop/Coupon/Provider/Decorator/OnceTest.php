@@ -12,7 +12,7 @@ namespace Aimeos\MShop\Coupon\Provider\Decorator;
 class OnceTest extends \PHPUnit\Framework\TestCase
 {
 	private $context;
-	private $orderBase;
+	private $order;
 	private $couponItem;
 
 
@@ -21,22 +21,22 @@ class OnceTest extends \PHPUnit\Framework\TestCase
 		$this->context = \TestHelperMShop::getContext();
 		$this->couponItem = \Aimeos\MShop::create( $this->context, 'coupon' )->createItem();
 
-		$orderBaseManager = \Aimeos\MShop::create( $this->context, 'order/base' );
-		$search = $orderBaseManager->createSearch();
-		$search->setConditions( $search->compare( '==', 'order.base.price', '4800.00' ) );
-		$baskets = $orderBaseManager->searchItems( $search );
+		$orderManager = \Aimeos\MShop::create( $this->context, 'order' );
+		$search = $orderManager->createSearch();
+		$search->setConditions( $search->compare( '==', 'order.price', '4800.00' ) );
+		$baskets = $orderManager->searchItems( $search );
 
 		if( ( $basket = reset( $baskets ) ) === false ) {
-			throw new \RuntimeException( 'No order base with price "4800.00" found' );
+			throw new \RuntimeException( 'No order with price "4800.00" found' );
 		}
 
-		$this->orderBase = $orderBaseManager->load( $basket->getId(), \Aimeos\MShop\Order\Item\Base\Base::PARTS_ADDRESS );
+		$this->order = $orderManager->load( $basket->getId(), \Aimeos\MShop\Order\Item\Base::PARTS_ADDRESS );
 	}
 
 
 	protected function tearDown()
 	{
-		unset( $this->context, $this->orderBase, $this->couponItem );
+		unset( $this->context, $this->order, $this->couponItem );
 	}
 
 
@@ -46,7 +46,7 @@ class OnceTest extends \PHPUnit\Framework\TestCase
 		$object = new \Aimeos\MShop\Coupon\Provider\Decorator\Once( $provider, $this->context, $this->couponItem, 'ABCD' );
 		$object->setObject( $object );
 
-		$this->assertTrue( $object->isAvailable( $this->orderBase ) );
+		$this->assertTrue( $object->isAvailable( $this->order ) );
 	}
 
 
@@ -56,6 +56,6 @@ class OnceTest extends \PHPUnit\Framework\TestCase
 		$object = new \Aimeos\MShop\Coupon\Provider\Decorator\Once( $provider, $this->context, $this->couponItem, 'OPQR' );
 		$object->setObject( $object );
 
-		$this->assertFalse( $object->isAvailable( $this->orderBase ) );
+		$this->assertFalse( $object->isAvailable( $this->order ) );
 	}
 }

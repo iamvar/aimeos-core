@@ -19,7 +19,7 @@ namespace Aimeos\MShop\Order\Manager;
  * @subpackage Order
  */
 class Standard
-	extends \Aimeos\MShop\Common\Manager\Base
+	extends \Aimeos\MShop\Order\Manager\Base
 	implements \Aimeos\MShop\Order\Manager\Iface, \Aimeos\MShop\Common\Manager\Factory\Iface
 {
 	private $searchConfig = array(
@@ -34,14 +34,6 @@ class Standard
 			'code' => 'order.siteid',
 			'internalcode' => 'mord."siteid"',
 			'label' => 'Invoice site ID',
-			'type' => 'integer',
-			'internaltype' => \Aimeos\MW\DB\Statement\Base::PARAM_INT,
-			'public' => false,
-		),
-		'order.baseid' => array(
-			'code' => 'order.baseid',
-			'internalcode' => 'mord."baseid"',
-			'label' => 'Invoice base ID',
 			'type' => 'integer',
 			'internaltype' => \Aimeos\MW\DB\Statement\Base::PARAM_INT,
 			'public' => false,
@@ -87,6 +79,84 @@ class Standard
 			'label' => 'Related invoice ID',
 			'type' => 'integer',
 			'internaltype' => \Aimeos\MW\DB\Statement\Base::PARAM_INT,
+		),
+		'order.sitecode' => array(
+			'code' => 'order.sitecode',
+			'internalcode' => ' mord."sitecode"',
+			'label' => 'Order site code',
+			'type' => 'string',
+			'internaltype' => \Aimeos\MW\DB\Statement\Base::PARAM_STR,
+			'public' => false,
+		),
+		'order.customerid' => array(
+			'code' => 'order.customerid',
+			'internalcode' => ' mord."customerid"',
+			'label' => 'Order customer ID',
+			'type' => 'string',
+			'internaltype' => \Aimeos\MW\DB\Statement\Base::PARAM_STR,
+		),
+		'order.customerref' => array(
+			'code' => 'order.customerref',
+			'internalcode' => ' mord."customerref"',
+			'label' => 'Order customer reference',
+			'type' => 'string',
+			'internaltype' => \Aimeos\MW\DB\Statement\Base::PARAM_STR,
+		),
+		'order.languageid' => array(
+			'code' => 'order.languageid',
+			'internalcode' => ' mord."langid"',
+			'label' => 'Order language code',
+			'type' => 'string',
+			'internaltype' => \Aimeos\MW\DB\Statement\Base::PARAM_STR,
+		),
+		'order.currencyid' => array(
+			'code' => 'order.currencyid',
+			'internalcode' => ' mord."currencyid"',
+			'label' => 'Order currencyid code',
+			'type' => 'string',
+			'internaltype' => \Aimeos\MW\DB\Statement\Base::PARAM_STR,
+		),
+		'order.price' => array(
+			'code' => 'order.price',
+			'internalcode' => ' mord."price"',
+			'label' => 'Order price amount',
+			'type' => 'string',
+			'internaltype' => \Aimeos\MW\DB\Statement\Base::PARAM_STR,
+		),
+		'order.costs' => array(
+			'code' => 'order.costs',
+			'internalcode' => ' mord."costs"',
+			'label' => 'Order shipping amount',
+			'type' => 'string',
+			'internaltype' => \Aimeos\MW\DB\Statement\Base::PARAM_STR,
+		),
+		'order.rebate' => array(
+			'code' => 'order.rebate',
+			'internalcode' => ' mord."rebate"',
+			'label' => 'Order rebate amount',
+			'type' => 'string',
+			'internaltype' => \Aimeos\MW\DB\Statement\Base::PARAM_STR,
+		),
+		'order.tax' => array(
+			'code' => 'order.tax',
+			'internalcode' => ' mord."tax"',
+			'label' => 'Order tax amount',
+			'type' => 'string',
+			'internaltype' => \Aimeos\MW\DB\Statement\Base::PARAM_STR,
+		),
+		'order.taxflag' => array(
+			'code' => 'order.taxflag',
+			'internalcode' => ' mord."taxflag"',
+			'label' => 'Order tax flag (0=net, 1=gross)',
+			'type' => 'string',
+			'internaltype' => \Aimeos\MW\DB\Statement\Base::PARAM_INT,
+		),
+		'order.comment' => array(
+			'code' => 'order.comment',
+			'internalcode' => ' mord."comment"',
+			'label' => 'Order comment',
+			'type' => 'string',
+			'internaltype' => \Aimeos\MW\DB\Statement\Base::PARAM_STR,
 		),
 		'order.cdate' => array(
 			'code' => 'order.cdate',
@@ -309,7 +379,9 @@ class Standard
 	public function clear( array $siteids )
 	{
 		$path = 'mshop/order/manager/submanagers';
-		foreach( $this->getContext()->getConfig()->get( $path, array( 'status', 'base' ) ) as $domain ) {
+		$ref = ['status', 'address', 'coupon', 'product', 'service'];
+
+		foreach( $this->getContext()->getConfig()->get( $path, $ref ) as $domain ) {
 			$this->getObject()->getSubManager( $domain )->clear( $siteids );
 		}
 
@@ -325,8 +397,25 @@ class Standard
 	 */
 	public function createItem( array $values = [] )
 	{
-		$values['order.siteid'] = $this->getContext()->getLocale()->getSiteId();
-		return $this->createItemBase( $values );
+		$context = $this->getContext();
+		$locale = $context->getLocale();
+
+		$values['order.siteid'] = $locale->getSiteId();
+		$price = \Aimeos\MShop::create( $context, 'price' )->createItem( [
+			'price.currencyid' => $values['order.currencyid'] ?? null,
+			'price.value' => $values['order.price'] ?? '0.00',
+			'price.costs' => $values['order.costs'] ?? '0.00',
+			'price.rebate' => $values['order.rebate'] ?? '0.00',
+			'price.taxflag' => $values['order.taxflag'] ?? '0.00',
+			'price.taxrates' => $values['order.taxrates'] ?? [],
+			'price.tax' => $values['order.tax'] ?? null,
+		] );
+
+		$order = $this->createItemBase( $price, clone $locale, $values );
+
+		\Aimeos\MShop::create( $context, 'plugin' )->register( $order, 'order' );
+
+		return $order;
 	}
 
 
@@ -343,7 +432,7 @@ class Standard
 		if( $default === true )
 		{
 			$search->setConditions( $search->combine( '&&', [
-				$search->compare( '==', 'order.base.customerid', $this->getContext()->getUserId() ),
+				$search->compare( '==', 'order.customerid', $this->getContext()->getUserId() ),
 				$search->getConditions()
 			] ) );
 		}
@@ -361,11 +450,13 @@ class Standard
 	 */
 	public function saveItem( \Aimeos\MShop\Order\Item\Iface $item, $fetch = true )
 	{
-		if( $item->getBaseId() === null ) {
-			throw new \Aimeos\MShop\Order\Exception( 'Required order base ID is missing' );
-		}
+		if( !$item->isModified() )
+		{
+			$this->storeAddresses( $item );
+			$this->storeProducts( $item );
+			$this->storeServices( $item );
+			$this->storeCoupons( $item );
 
-		if( !$item->isModified() ) {
 			return $item;
 		}
 
@@ -459,6 +550,9 @@ class Standard
 				$sql = $this->addSqlColumns( array_keys( $columns ), $this->getSqlConfig( $path ), false );
 			}
 
+			$priceItem = $item->getPrice();
+			$localeItem = $context->getLocale();
+
 			$idx = 1;
 			$stmt = $this->getCachedStatement( $conn, $path, $sql );
 
@@ -466,13 +560,23 @@ class Standard
 				$stmt->bind( $idx++, $item->get( $name ), $entry->getInternalType() );
 			}
 
-			$stmt->bind( $idx++, $item->getBaseId(), \Aimeos\MW\DB\Statement\Base::PARAM_INT );
 			$stmt->bind( $idx++, $item->getType() );
 			$stmt->bind( $idx++, $item->getDatePayment() );
 			$stmt->bind( $idx++, $item->getDateDelivery() );
 			$stmt->bind( $idx++, $item->getDeliveryStatus(), \Aimeos\MW\DB\Statement\Base::PARAM_INT );
 			$stmt->bind( $idx++, $item->getPaymentStatus(), \Aimeos\MW\DB\Statement\Base::PARAM_INT );
 			$stmt->bind( $idx++, $item->getRelatedId(), \Aimeos\MW\DB\Statement\Base::PARAM_INT );
+			$stmt->bind( $idx++, $item->getCustomerId() );
+			$stmt->bind( $idx++, $localeItem->getSite()->getCode() );
+			$stmt->bind( $idx++, $item->getLocale()->getLanguageId() );
+			$stmt->bind( $idx++, $priceItem->getCurrencyId() );
+			$stmt->bind( $idx++, $priceItem->getValue() );
+			$stmt->bind( $idx++, $priceItem->getCosts() );
+			$stmt->bind( $idx++, $priceItem->getRebate() );
+			$stmt->bind( $idx++, $priceItem->getTaxValue() );
+			$stmt->bind( $idx++, $priceItem->getTaxFlag(), \Aimeos\MW\DB\Statement\Base::PARAM_INT );
+			$stmt->bind( $idx++, $item->getCustomerReference() );
+			$stmt->bind( $idx++, $item->getComment() );
 			$stmt->bind( $idx++, $date ); // mtime
 			$stmt->bind( $idx++, $context->getEditor() );
 			$stmt->bind( $idx++, $context->getLocale()->getSiteId(), \Aimeos\MW\DB\Statement\Base::PARAM_INT );
@@ -543,6 +647,11 @@ class Standard
 
 
 		$this->addStatus( $item );
+
+		$this->storeAddresses( $item );
+		$this->storeProducts( $item );
+		$this->storeServices( $item );
+		$this->storeCoupons( $item );
 
 		return $item;
 	}
@@ -616,7 +725,9 @@ class Standard
 	public function getResourceType( $withsub = true )
 	{
 		$path = 'mshop/order/manager/submanagers';
-		return $this->getResourceTypeBase( 'order', $path, array( 'base', 'status' ), $withsub );
+		$ref = ['address', 'coupon', 'product', 'service', 'status'];
+
+		return $this->getResourceTypeBase( 'order', $path, $ref, $withsub );
 	}
 
 
@@ -646,7 +757,7 @@ class Standard
 		 * @category Developer
 		 */
 		$path = 'mshop/order/manager/submanagers';
-		$default = array( 'base', 'status' );
+		$default = ['address', 'coupon', 'product', 'service', 'status'];
 
 		return $this->getSearchAttributesBase( $this->searchConfig, $path, $default, $withsub );
 	}
@@ -662,13 +773,15 @@ class Standard
 	 */
 	public function searchItems( \Aimeos\MW\Criteria\Iface $search, array $ref = [], &$total = null )
 	{
+		$map = [];
+
 		$context = $this->getContext();
+		$priceManager = \Aimeos\MShop::create( $context, 'price' );
+		$localeManager = \Aimeos\MShop::create( $context, 'locale' );
 
 		$dbm = $context->getDatabaseManager();
 		$dbname = $this->getResourceName();
 		$conn = $dbm->acquire( $dbname );
-
-		$items = [];
 
 		try
 		{
@@ -823,8 +936,25 @@ class Standard
 
 			try
 			{
-				while( ( $row = $results->fetch() ) !== false ) {
-					$items[(string) $row['order.id']] = $this->createItemBase( $row );
+				while( ( $row = $results->fetch() ) !== false )
+				{
+					$price = $priceManager->createItem( [
+						'price.currencyid' => $row['order.currencyid'],
+						'price.value' => $row['order.price'],
+						'price.costs' => $row['order.costs'],
+						'price.rebate' => $row['order.rebate'],
+						'price.tax' => $row['order.tax'],
+						'price.taxflag' => $row['order.taxflag'],
+					] );
+
+					// you may need the site object! take care!
+					$locale = $localeManager->createItem( [
+						'locale.languageid' => $row['order.languageid'],
+						'locale.currencyid' => $row['order.currencyid'],
+						'locale.siteid' => $row['order.siteid'],
+					] );
+
+					$map[(string) $row['order.id']] = [$price, $locale, $row];
 				}
 			}
 			catch( \Exception $e )
@@ -841,7 +971,7 @@ class Standard
 			throw $e;
 		}
 
-		return $items;
+		return $this->buildItems( $map, $ref );
 	}
 
 
@@ -889,13 +1019,193 @@ class Standard
 
 
 	/**
-	 * Creates a new order item.
+	 * Creates a new basket containing the items from the order excluding the coupons.
+	 * If the last parameter is ture, the items will be marked as new and
+	 * modified so an additional order is stored when the basket is saved.
 	 *
-	 * @param array $values List of attributes for order item
-	 * @return \Aimeos\MShop\Order\Item\Iface New order item
+	 * @param string $id Base ID of the order to load
+	 * @param integer $parts Bitmap of the basket parts that should be loaded
+	 * @param boolean $fresh Create a new basket by copying the existing one and remove IDs
+	 * @param boolean $default True to use default criteria, false for no limitation
+	 * @return \Aimeos\MShop\Order\Item\Iface Basket including all items
 	 */
-	protected function createItemBase( array $values = [] )
+	public function load( $id, $parts = \Aimeos\MShop\Order\Item\Base::PARTS_ALL, $fresh = false, $default = false )
 	{
-		return new \Aimeos\MShop\Order\Item\Standard( $values );
+		$search = $this->getObject()->createSearch( $default );
+		$expr = [
+			$search->compare( '==', 'order.id', $id ),
+			$search->getConditions(),
+		];
+		$search->setConditions( $search->combine( '&&', $expr ) );
+
+		$context = $this->getContext();
+		$dbm = $context->getDatabaseManager();
+		$dbname = $this->getResourceName();
+		$conn = $dbm->acquire( $dbname );
+
+		try
+		{
+			$sitelevel = \Aimeos\MShop\Locale\Manager\Base::SITE_SUBTREE;
+			$cfgPathSearch = 'mshop/order/manager/standard/search';
+			$cfgPathCount = 'mshop/order/manager/standard/count';
+			$required = array( 'order' );
+			$total = null;
+
+			$results = $this->searchItemsBase( $conn, $search, $cfgPathSearch, $cfgPathCount, $required, $total, $sitelevel );
+
+			if( ( $row = $results->fetch() ) === false ) {
+				throw new \Aimeos\MShop\Order\Exception( sprintf( 'Order item with order ID "%1$s" not found', $id ) );
+			}
+			$results->finish();
+
+			$dbm->release( $conn, $dbname );
+		}
+		catch( \Exception $e )
+		{
+			$dbm->release( $conn, $dbname );
+			throw $e;
+		}
+
+		$priceManager = \Aimeos\MShop::create( $context, 'price' );
+		$localeManager = \Aimeos\MShop::create( $context, 'locale' );
+
+		$price = $priceManager->createItem( [
+			'price.currencyid' => $row['order.currencyid'],
+			'price.value' => $row['order.price'],
+			'price.costs' => $row['order.costs'],
+			'price.rebate' => $row['order.rebate'],
+			'price.tax' => $row['order.tax'],
+			'price.taxflag' => $row['order.taxflag'],
+		] );
+
+		// you may need the site object! take care!
+		$localeItem = $localeManager->createItem( [
+			'locale.languageid' => $row['order.languageid'],
+			'locale.currencyid' => $row['order.currencyid'],
+			'locale.siteid' => $row['order.siteid'],
+		] );
+
+		if( $fresh === false ) {
+			$basket = $this->loadItems( $id, $price, $localeItem, $row, $parts );
+		} else {
+			$basket = $this->loadFresh( $id, $price, $localeItem, $row, $parts );
+		}
+
+		$pluginManager = \Aimeos\MShop::create( $this->getContext(), 'plugin' );
+		$pluginManager->register( $basket, 'order' );
+
+		return $basket;
+	}
+
+
+	/**
+	 * Saves the complete basket to the storage including the items attached.
+	 *
+	 * @param \Aimeos\MShop\Order\Item\Iface $basket Basket object containing all information
+	 * @param integer $parts Bitmap of the basket parts that should be stored
+	 * @return \Aimeos\MShop\Order\Item\Iface Stored order basket
+	 */
+	public function store( \Aimeos\MShop\Order\Item\Iface $basket, $parts = \Aimeos\MShop\Order\Item\Base::PARTS_ALL )
+	{
+		$basket = $this->getObject()->saveItem( $basket );
+
+		if( $parts & \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT
+			|| $parts & \Aimeos\MShop\Order\Item\Base::PARTS_COUPON
+		) {
+			$this->storeProducts( $basket );
+		}
+
+		if( $parts & \Aimeos\MShop\Order\Item\Base::PARTS_COUPON ) {
+			$this->storeCoupons( $basket );
+		}
+
+		if( $parts & \Aimeos\MShop\Order\Item\Base::PARTS_ADDRESS ) {
+			$this->storeAddresses( $basket );
+		}
+
+		if( $parts & \Aimeos\MShop\Order\Item\Base::PARTS_SERVICE ) {
+			$this->storeServices( $basket );
+		}
+
+		return $basket;
+	}
+
+
+	/**
+	 * Creates the order item objects from the map and adds the referenced items
+	 *
+	 * @param array $map Associative list of order IDs as keys and list of price/locale/row as values
+	 * @param string[] $ref Domain items that should be added as well, e.g.
+	 *	"order/address", "order/coupon", "order/product", "order/service"
+	 * @return \Aimeos\MShop\Order\Item\Iface[] Associative list of order IDs as keys and items as values
+	 */
+	protected function buildItems( array $map, array $ref )
+	{
+		$items = [];
+		$orderIds = array_keys( $map );
+		$addressMap = $couponMap = $productMap = $serviceMap = [];
+
+		if( in_array( 'order/address', $ref ) ) {
+			$addressMap = $this->getAddresses( $orderIds );
+		}
+
+		if( in_array( 'order/product', $ref ) ) {
+			$productMap = $this->getProducts( $orderIds );
+		}
+
+		if( in_array( 'order/coupon', $ref ) ) {
+			$couponMap = $this->getCoupons( $orderIds, false, $productMap );
+		}
+
+		if( in_array( 'order/service', $ref ) ) {
+			$serviceMap = $this->getServices( $orderIds );
+		}
+
+		foreach( $map as $id => $list )
+		{
+			list( $price, $locale, $row ) = $list;
+			$addresses = $coupons = $products = $services = [];
+
+			if( isset( $addressMap[$id] ) ) {
+				$addresses = $addressMap[$id];
+			}
+
+			if( isset( $couponMap[$id] ) ) {
+				$coupons = $couponMap[$id];
+			}
+
+			if( isset( $productMap[$id] ) ) {
+				$products = $productMap[$id];
+			}
+
+			if( isset( $serviceMap[$id] ) ) {
+				$services = $serviceMap[$id];
+			}
+
+			$items[$id] = $this->createItemBase( $price, $locale, $row, $products, $addresses, $services, $coupons );
+		}
+
+		return $items;
+	}
+
+
+	/**
+	 * Returns a new and empty order item (shopping basket).
+	 *
+	 * @param \Aimeos\MShop\Price\Item\Iface $price Default price of the basket (usually 0.00)
+	 * @param \Aimeos\MShop\Locale\Item\Iface $locale Locale item containing the site, language and currency
+	 * @param array $values Associative list of key/value pairs containing, e.g. the order or user ID
+	 * @param \Aimeos\MShop\Order\Item\Product\Iface[] $products List of ordered product items
+	 * @param \Aimeos\MShop\Order\Item\Address\Iface[] $addresses List of order address items
+	 * @param \Aimeos\MShop\Order\Item\Service\Iface[] $services List of order serviceitems
+	 * @param \Aimeos\MShop\Order\Item\Product\Iface[] $coupons Associative list of coupon codes as keys and items as values
+	 * @return \Aimeos\MShop\Order\Item\Iface Order object
+	 */
+	protected function createItemBase( \Aimeos\MShop\Price\Item\Iface $price, \Aimeos\MShop\Locale\Item\Iface $locale,
+		array $values = [], array $products = [], array $addresses = [],
+		array $services = [], array $coupons = [] )
+	{
+		return new \Aimeos\MShop\Order\Item\Standard( $price, $locale,
+			$values, $products, $addresses, $services, $coupons );
 	}
 }

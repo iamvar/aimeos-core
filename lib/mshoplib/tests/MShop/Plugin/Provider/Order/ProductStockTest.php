@@ -22,7 +22,7 @@ class ProductStockTest extends \PHPUnit\Framework\TestCase
 	{
 		$this->context = \TestHelperMShop::getContext();
 		$this->plugin = \Aimeos\MShop::create( $this->context, 'plugin' )->createItem();
-		$this->order = \Aimeos\MShop::create( $this->context, 'order/base' )->createItem()->off(); // remove event listeners
+		$this->order = \Aimeos\MShop::create( $this->context, 'order' )->createItem()->off(); // remove event listeners
 
 		$this->object = new \Aimeos\MShop\Plugin\Provider\Order\ProductStock( $this->context, $this->plugin );
 	}
@@ -48,7 +48,7 @@ class ProductStockTest extends \PHPUnit\Framework\TestCase
 
 	public function testUpdateOk()
 	{
-		$part = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+		$part = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 		$this->assertEquals( $part, $this->object->update( $this->order, 'check.after', $part ) );
 	}
 
@@ -59,7 +59,7 @@ class ProductStockTest extends \PHPUnit\Framework\TestCase
 
 		try
 		{
-			$part = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+			$part = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 			$this->object->update( $this->order, 'check.after', $part );
 
 			throw new \RuntimeException( 'Expected exception not thrown' );
@@ -78,7 +78,7 @@ class ProductStockTest extends \PHPUnit\Framework\TestCase
 
 		try
 		{
-			$part = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+			$part = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 			$this->object->update( $this->order, 'check.after', $part );
 
 			throw new \RuntimeException( 'Expected exception not thrown' );
@@ -93,7 +93,7 @@ class ProductStockTest extends \PHPUnit\Framework\TestCase
 
 	public function testUpdateStockUnlimited()
 	{
-		$part = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+		$part = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 		$this->order->addProduct( $this->getOrderProduct( 'MNOP' )->setStockType( 'unit_type4' ) );
 
 		$this->assertEquals( $part, $this->object->update( $this->order, 'check.after', $part ) );
@@ -104,13 +104,13 @@ class ProductStockTest extends \PHPUnit\Framework\TestCase
 	 * Returns an order product item
 	 *
 	 * @param string $code Unique product code
-	 * @return \Aimeos\MShop\Order\Item\Base\Product\Iface Order product item
+	 * @return \Aimeos\MShop\Order\Item\Product\Iface Order product item
 	 */
 	protected function getOrderProduct( $code )
 	{
 		$productItem = \Aimeos\MShop::create( $this->context, 'product' )->findItem( $code );
 
-		return \Aimeos\MShop::create( $this->context, 'order/base/product' )
+		return \Aimeos\MShop::create( $this->context, 'order/product' )
 			->createItem()->copyFrom( $productItem );
 	}
 }

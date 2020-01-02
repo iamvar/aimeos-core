@@ -112,13 +112,13 @@ class PropertyMatch
 		{
 			foreach( $value as $orderProduct )
 			{
-				\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Base\Product\Iface::class, $orderProduct );
+				\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Product\Iface::class, $orderProduct );
 				$list[] = $orderProduct->getProductId();
 			}
 		}
 		else
 		{
-			\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Base\Product\Iface::class, $value );
+			\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Product\Iface::class, $value );
 			$list[] = $value->getProductId();
 		}
 

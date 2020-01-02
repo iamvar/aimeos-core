@@ -12,7 +12,7 @@ namespace Aimeos\MShop\Coupon\Provider;
 class NoneTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
-	private $orderBase;
+	private $order;
 
 
 	protected function setUp()
@@ -21,8 +21,8 @@ class NoneTest extends \PHPUnit\Framework\TestCase
 		$priceManager = \Aimeos\MShop\Price\Manager\Factory::create( $context );
 		$item = \Aimeos\MShop\Coupon\Manager\Factory::create( $context )->createItem();
 
-		// Don't create order base item by createItem() as this would already register the plugins
-		$this->orderBase = new \Aimeos\MShop\Order\Item\Base\Standard( $priceManager->createItem(), $context->getLocale() );
+		// Don't create order item by createItem() as this would already register the plugins
+		$this->order = new \Aimeos\MShop\Order\Item\Standard( $priceManager->createItem(), $context->getLocale() );
 		$this->object = new \Aimeos\MShop\Coupon\Provider\None( $context, $item, '1234' );
 	}
 
@@ -30,12 +30,12 @@ class NoneTest extends \PHPUnit\Framework\TestCase
 	protected function tearDown()
 	{
 		unset( $this->object );
-		unset( $this->orderBase );
+		unset( $this->order );
 	}
 
 
 	public function testUpdate()
 	{
-		$this->object->update( $this->orderBase );
+		$this->object->update( $this->order );
 	}
 }

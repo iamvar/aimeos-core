@@ -37,10 +37,10 @@ class Standard
 			'internaltype' => \Aimeos\MW\DB\Statement\Base::PARAM_INT,
 			'public' => false,
 		),
-		'subscription.ordbaseid' => array(
-			'code' => 'subscription.ordbaseid',
-			'internalcode' => 'mord."baseid"',
-			'label' => 'Order base ID',
+		'subscription.orderid' => array(
+			'code' => 'subscription.orderid',
+			'internalcode' => 'mord."id"',
+			'label' => 'Order ID',
 			'type' => 'integer',
 			'internaltype' => \Aimeos\MW\DB\Statement\Base::PARAM_INT,
 			'public' => false,
@@ -261,7 +261,7 @@ class Standard
 	 */
 	public function saveItem( \Aimeos\MShop\Subscription\Item\Iface $item, $fetch = true )
 	{
-		if( $item->getOrderProductId() === null ) {
+		if( $item->getProductId() === null ) {
 			throw new \Aimeos\MShop\Subscription\Exception( 'Required order product ID is missing' );
 		}
 
@@ -366,8 +366,8 @@ class Standard
 				$stmt->bind( $idx++, $item->get( $name ), $entry->getInternalType() );
 			}
 
-			$stmt->bind( $idx++, $item->getOrderBaseId(), \Aimeos\MW\DB\Statement\Base::PARAM_INT );
-			$stmt->bind( $idx++, $item->getOrderProductId(), \Aimeos\MW\DB\Statement\Base::PARAM_INT );
+			$stmt->bind( $idx++, $item->getOrderId(), \Aimeos\MW\DB\Statement\Base::PARAM_INT );
+			$stmt->bind( $idx++, $item->getProductId(), \Aimeos\MW\DB\Statement\Base::PARAM_INT );
 			$stmt->bind( $idx++, $item->getDateNext() );
 			$stmt->bind( $idx++, $item->getDateEnd() );
 			$stmt->bind( $idx++, $item->getInterval() );
@@ -541,7 +541,7 @@ class Standard
 		 */
 		$path = 'mshop/subscription/manager/submanagers';
 
-		return $this->getSearchAttributesBase( $this->searchConfig, $path, ['base'], $withsub );
+		return $this->getSearchAttributesBase( $this->searchConfig, $path, ['address', 'coupon', 'product', 'service'], $withsub );
 	}
 
 
@@ -565,7 +565,7 @@ class Standard
 
 		try
 		{
-			$required = array( 'subscription', 'order.base' );
+			$required = array( 'subscription', 'order' );
 
 			/** mshop/subscription/manager/sitemode
 			 * Mode how items from levels below or above in the site tree are handled
@@ -743,7 +743,7 @@ class Standard
 	 *
 	 * @param string $manager Name of the sub manager type in lower case
 	 * @param string|null $name Name of the implementation, will be from configuration (or Default) if null
-	 * @return \Aimeos\MShop\Common\Manager\Iface Manager for different extensions, e.g base, etc.
+	 * @return \Aimeos\MShop\Common\Manager\Iface Manager for different extensions, e.g "product", etc.
 	 */
 	public function getSubManager( $manager, $name = null )
 	{

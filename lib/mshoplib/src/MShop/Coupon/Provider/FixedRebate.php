@@ -70,14 +70,14 @@ class FixedRebate
 
 
 	/**
-	 * Updates the result of a coupon to the order base instance.
+	 * Updates the result of a coupon to the order instance.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $base Basic order of the customer
+	 * @param \Aimeos\MShop\Order\Item\Iface $order Basic order of the customer
 	 * @return \Aimeos\MShop\Coupon\Provider\Iface Provider object for method chaining
 	 */
-	public function update( \Aimeos\MShop\Order\Item\Base\Iface $base )
+	public function update( \Aimeos\MShop\Order\Item\Iface $order )
 	{
-		$currency = $base->getPrice()->getCurrencyId();
+		$currency = $order->getPrice()->getCurrencyId();
 		$rebate = $this->getConfigValue( 'fixedrebate.rebate', [] );
 		$prodcode = $this->getConfigValue( 'fixedrebate.productcode' );
 
@@ -89,7 +89,7 @@ class FixedRebate
 		}
 
 		if( isset( $rebate[$currency] ) ) {
-			$base->setCoupon( $this->getCode(), $this->createRebateProducts( $base, $prodcode, $rebate[$currency] ) );
+			$order->setCoupon( $this->getCode(), $this->createRebateProducts( $order, $prodcode, $rebate[$currency] ) );
 		}
 
 		return $this;

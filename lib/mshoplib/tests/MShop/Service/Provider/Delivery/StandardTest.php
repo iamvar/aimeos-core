@@ -41,7 +41,7 @@ class StandardTest extends \PHPUnit\Framework\TestCase
 	public function testGetConfigFE()
 	{
 		$orderManager = \Aimeos\MShop\Order\Manager\Factory::create( $this->context );
-		$basket = $orderManager->getSubManager( 'base' )->createItem();
+		$basket = $orderManager->createItem();
 
 		$this->assertEquals( [], $this->object->getConfigFE( $basket ) );
 	}
@@ -71,7 +71,7 @@ class StandardTest extends \PHPUnit\Framework\TestCase
 
 	public function testSetConfigFE()
 	{
-		$item = \Aimeos\MShop::create( $this->context, 'order/base/service' )->createItem();
+		$item = \Aimeos\MShop::create( $this->context, 'order/service' )->createItem();
 		$this->object->setConfigFE( $item, array( 'test.code' => 'abc', 'test.number' => 123 ) );
 
 		$this->assertEquals( 2, count( $item->getAttributeItems() ) );

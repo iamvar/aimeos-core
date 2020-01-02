@@ -138,10 +138,10 @@ abstract class Base
 	/**
 	 * Sets the payment attributes in the given service.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Service\Iface $orderServiceItem Order service item that will be added to the basket
+	 * @param \Aimeos\MShop\Order\Item\Service\Iface $orderServiceItem Order service item that will be added to the basket
 	 * @param array $attributes Attribute key/value pairs entered by the customer during the checkout process
 	 */
-	public function setConfigFE( \Aimeos\MShop\Order\Item\Base\Service\Iface $orderServiceItem, array $attributes )
+	public function setConfigFE( \Aimeos\MShop\Order\Item\Service\Iface $orderServiceItem, array $attributes )
 	{
 		return $this->setAttributes( $orderServiceItem, $attributes, 'payment' );
 	}

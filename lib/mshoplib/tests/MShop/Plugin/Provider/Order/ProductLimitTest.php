@@ -23,17 +23,17 @@ class ProductLimitTest extends \PHPUnit\Framework\TestCase
 	{
 		$this->context = \TestHelperMShop::getContext();
 		$this->plugin = \Aimeos\MShop::create( $this->context, 'plugin' )->createItem()->setConfig( ['single-number-max' => 10] );
-		$this->order = \Aimeos\MShop::create( $this->context, 'order/base' )->createItem()->off(); // remove event listeners
+		$this->order = \Aimeos\MShop::create( $this->context, 'order' )->createItem()->off(); // remove event listeners
 
 		$this->products = [];
-		$orderBaseProductManager = \Aimeos\MShop::create( $this->context, 'order/base/product' );
+		$orderProductManager = \Aimeos\MShop::create( $this->context, 'order/product' );
 
 		$manager = \Aimeos\MShop\Product\Manager\Factory::create( \TestHelperMShop::getContext() );
 		$search = $manager->createSearch();
 		$search->setConditions( $search->compare( '==', 'product.code', array( 'CNE', 'CNC' ) ) );
 
 		foreach( $manager->searchItems( $search ) as $product ) {
-			$this->products[$product->getCode()] = $orderBaseProductManager->createItem()->copyFrom( $product );
+			$this->products[$product->getCode()] = $orderProductManager->createItem()->copyFrom( $product );
 		}
 
 		$this->object = new \Aimeos\MShop\Plugin\Provider\Order\ProductLimit( $this->context, $this->plugin );

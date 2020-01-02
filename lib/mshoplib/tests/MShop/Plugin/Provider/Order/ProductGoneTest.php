@@ -27,13 +27,13 @@ class ProductGoneTest extends \PHPUnit\Framework\TestCase
 		$newProduct = $manager->findItem( 'CNE' )->setId( null )->setLabel( 'Bad Product' )->setCode( 'WTF' );
 		$this->product = $manager->saveItem( $newProduct );
 
-		$manager = \Aimeos\MShop::create( $this->context, 'order/base' );
+		$manager = \Aimeos\MShop::create( $this->context, 'order' );
 		$search = $manager->createSearch()->setSlice( 0, 1 );
-		$search->setConditions( $search->compare( '==', 'order.base.price', 672.00 ) );
+		$search->setConditions( $search->compare( '==', 'order.price', 672.00 ) );
 		$items = $manager->searchItems( $search );
 
 		if( ( $this->order = reset( $items ) ) === false ) {
-			throw new \RuntimeException( 'No order base item found.' );
+			throw new \RuntimeException( 'No order item found.' );
 		}
 
 		$this->object = new \Aimeos\MShop\Plugin\Provider\Order\ProductGone( $this->context, $plugin );
@@ -63,18 +63,18 @@ class ProductGoneTest extends \PHPUnit\Framework\TestCase
 
 	public function testUpdateOk()
 	{
-		$type = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+		$type = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 		$this->assertEquals( $type, $this->object->update( $this->order, 'check.after', $type ) );
 	}
 
 
 	public function testUpdateProductDeleted()
 	{
-		$badItem = \Aimeos\MShop::create( $this->context, 'order/base/product' )->createItem()
+		$badItem = \Aimeos\MShop::create( $this->context, 'order/product' )->createItem()
 			->setProductId( -13 )->setProductCode( 'NONE' );
 
 		$this->order->addProduct( $badItem );
-		$type = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+		$type = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 
 		$this->setExpectedException( \Aimeos\MShop\Plugin\Provider\Exception::class );
 		$this->object->update( $this->order, 'check.after', $type );
@@ -83,14 +83,14 @@ class ProductGoneTest extends \PHPUnit\Framework\TestCase
 
 	public function testUpdateProductEnded()
 	{
-		$badItem = \Aimeos\MShop::create( $this->context, 'order/base/product' )
+		$badItem = \Aimeos\MShop::create( $this->context, 'order/product' )
 			->createItem()->copyFrom( $this->product );
 
 		$this->product->setDateEnd( '1999-12-31 23:59:59' );
 		\Aimeos\MShop\Product\Manager\Factory::create( $this->context )->saveItem( $this->product );
 
 		$this->order->addProduct( $badItem );
-		$type = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+		$type = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 
 		$this->setExpectedException( \Aimeos\MShop\Plugin\Provider\Exception::class );
 		$this->object->update( $this->order, 'check.after', $type );
@@ -99,14 +99,14 @@ class ProductGoneTest extends \PHPUnit\Framework\TestCase
 
 	public function testUpdateProductNotStarted()
 	{
-		$badItem = \Aimeos\MShop::create( $this->context, 'order/base/product' )
+		$badItem = \Aimeos\MShop::create( $this->context, 'order/product' )
 			->createItem()->copyFrom( $this->product );
 
 		$this->product->setDateStart( '2100-12-31 23:59:59' );
 		\Aimeos\MShop\Product\Manager\Factory::create( $this->context )->saveItem( $this->product );
 
 		$this->order->addProduct( $badItem );
-		$type = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+		$type = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 
 		$this->setExpectedException( \Aimeos\MShop\Plugin\Provider\Exception::class );
 		$this->object->update( $this->order, 'check.after', $type );
@@ -115,7 +115,7 @@ class ProductGoneTest extends \PHPUnit\Framework\TestCase
 
 	public function testUpdateProductDeactivated()
 	{
-		$badItem = \Aimeos\MShop::create( $this->context, 'order/base/product' )
+		$badItem = \Aimeos\MShop::create( $this->context, 'order/product' )
 			->createItem()->copyFrom( $this->product );
 
 		\Aimeos\MShop\Product\Manager\Factory::create( $this->context )->saveItem( $this->product->setStatus( 0 ) );
@@ -126,7 +126,7 @@ class ProductGoneTest extends \PHPUnit\Framework\TestCase
 
 		try
 		{
-			$type = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+			$type = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 			$this->object->update( $this->order, 'check.after', $type );
 			$this->fail( '\Aimeos\MShop\Plugin\Provider\Exception not thrown.' );
 		}

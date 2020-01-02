@@ -20,7 +20,7 @@ class CouponTest extends \PHPUnit\Framework\TestCase
 	{
 		$context = \TestHelperMShop::getContext();
 		$plugin = \Aimeos\MShop::create( $context, 'plugin' )->createItem();
-		$this->order = \Aimeos\MShop::create( $context, 'order/base' )->createItem()->off(); // remove event listeners
+		$this->order = \Aimeos\MShop::create( $context, 'order' )->createItem()->off(); // remove event listeners
 
 		$this->object = new \Aimeos\MShop\Plugin\Provider\Order\Coupon( $context, $plugin );
 	}

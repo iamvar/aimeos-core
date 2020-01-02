@@ -151,16 +151,16 @@ class Supplier
 	 * Returns the configuration attribute definitions of the provider to generate a list of available fields and
 	 * rules for the value of each field in the frontend.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $basket Basket object
+	 * @param \Aimeos\MShop\Order\Item\Iface $basket Basket object
 	 * @return array List of attribute definitions implementing \Aimeos\MW\Common\Critera\Attribute\Iface
 	 */
-	public function getConfigFE( \Aimeos\MShop\Order\Item\Base\Iface $basket )
+	public function getConfigFE( \Aimeos\MShop\Order\Item\Iface $basket )
 	{
 		$feconfig = $this->feConfig;
 
 		try
 		{
-			$type = \Aimeos\MShop\Order\Item\Base\Service\Base::TYPE_DELIVERY;
+			$type = \Aimeos\MShop\Order\Item\Service\Base::TYPE_DELIVERY;
 			$service = $this->getBasketService( $basket, $type, $this->getServiceItem()->getCode() );
 
 			if( ( $value = $service->getAttribute( 'supplier.code', 'delivery' ) ) != ''
@@ -181,11 +181,11 @@ class Supplier
 	/**
 	 * Sets the delivery attributes in the given service.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Service\Iface $orderServiceItem Order service item that will be added to the basket
+	 * @param \Aimeos\MShop\Order\Item\Service\Iface $orderServiceItem Order service item that will be added to the basket
 	 * @param array $attributes Attribute key/value pairs entered by the customer during the checkout process
-	 * @return \Aimeos\MShop\Order\Item\Base\Service\Iface Order service item with attributes added
+	 * @return \Aimeos\MShop\Order\Item\Service\Iface Order service item with attributes added
 	 */
-	public function setConfigFE( \Aimeos\MShop\Order\Item\Base\Service\Iface $orderServiceItem, array $attributes )
+	public function setConfigFE( \Aimeos\MShop\Order\Item\Service\Iface $orderServiceItem, array $attributes )
 	{
 		if( ( $code = $attributes['supplier.code'] ) != '' )
 		{

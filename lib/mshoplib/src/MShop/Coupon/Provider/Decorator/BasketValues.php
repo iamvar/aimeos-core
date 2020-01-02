@@ -72,12 +72,12 @@ class BasketValues
 	/**
 	 * Checks for the min/max order value.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $base Basic order of the customer
+	 * @param \Aimeos\MShop\Order\Item\Iface $order Basic order of the customer
 	 * @return boolean True if the basket matches the constraints, false if not
 	 */
-	public function isAvailable( \Aimeos\MShop\Order\Item\Base\Iface $base )
+	public function isAvailable( \Aimeos\MShop\Order\Item\Iface $order )
 	{
-		$price = $base->getPrice();
+		$price = $order->getPrice();
 		$currency = $price->getCurrencyId();
 		$value = $price->getValue() + $price->getRebate();
 
@@ -93,6 +93,6 @@ class BasketValues
 			return false;
 		}
 
-		return parent::isAvailable( $base );
+		return parent::isAvailable( $order );
 	}
 }

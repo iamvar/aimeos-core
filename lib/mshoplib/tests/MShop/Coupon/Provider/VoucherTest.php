@@ -13,7 +13,7 @@ class VoucherTest extends \PHPUnit\Framework\TestCase
 {
 	private $context;
 	private $couponItem;
-	private $orderBase;
+	private $order;
 	private $object;
 
 
@@ -25,8 +25,8 @@ class VoucherTest extends \PHPUnit\Framework\TestCase
 		$this->couponItem = \Aimeos\MShop\Coupon\Manager\Factory::create( $this->context )->createItem();
 		$this->couponItem->setConfig( array( 'voucher.productcode' => 'U:MD' ) );
 
-		// Don't create order base item by createItem() as this would already register the plugins
-		$this->orderBase = new \Aimeos\MShop\Order\Item\Base\Standard( $priceManager->createItem(), $this->context->getLocale() );
+		// Don't create order item by createItem() as this would already register the plugins
+		$this->order = new \Aimeos\MShop\Order\Item\Standard( $priceManager->createItem(), $this->context->getLocale() );
 
 		$this->object = new \Aimeos\MShop\Coupon\Provider\Voucher( $this->context, $this->couponItem, '90AB' );
 	}
@@ -34,15 +34,15 @@ class VoucherTest extends \PHPUnit\Framework\TestCase
 
 	protected function tearDown()
 	{
-		unset( $this->object, $this->context, $this->couponItem, $this->orderBase );
+		unset( $this->object, $this->context, $this->couponItem, $this->order );
 	}
 
 
 	public function testUpdate()
 	{
-		$this->orderBase->addProduct( $this->getOrderProduct() );
+		$this->order->addProduct( $this->getOrderProduct() );
 
-		$orderProduct = \Aimeos\MShop::create( $this->context, 'order/base/product' )->createItem();
+		$orderProduct = \Aimeos\MShop::create( $this->context, 'order/product' )->createItem();
 		$orderProduct->getPrice()->setCurrencyId( 'EUR' );
 		$orderProduct->getPrice()->setValue( '100.00' );
 
@@ -57,10 +57,10 @@ class VoucherTest extends \PHPUnit\Framework\TestCase
 		$object->expects( $this->once() )->method( 'getUsedRebate' )
 			->will( $this->returnValue( 20.0 ) );
 
-		$object->update( $this->orderBase );
+		$object->update( $this->order );
 
-		$coupons = $this->orderBase->getCoupons();
-		$products = $this->orderBase->getProducts();
+		$coupons = $this->order->getCoupons();
+		$products = $this->order->getProducts();
 
 		if( ( $product = reset( $coupons['90AB'] ) ) === false ) {
 			throw new \RuntimeException( 'No coupon available' );
@@ -86,7 +86,7 @@ class VoucherTest extends \PHPUnit\Framework\TestCase
 	}
 
 
-	public function testFilterOrderBaseIds()
+	public function testFilter()
 	{
 		$manager = \Aimeos\MShop::create( $this->context, 'order' );
 
@@ -95,11 +95,11 @@ class VoucherTest extends \PHPUnit\Framework\TestCase
 
 		$list = [];
 		foreach( $manager->searchItems( $search ) as $item ) {
-			$list[] = $item->getBaseId();
+			$list[] = $item->getId();
 		}
 		sort( $list );
 
-		$actual = $this->access( 'filterOrderBaseIds' )->invokeArgs( $this->object, [$list + [-1]] );
+		$actual = $this->access( 'filter' )->invokeArgs( $this->object, [$list + [-1]] );
 		sort( $actual );
 
 		$this->assertEquals( $list, $actual );
@@ -139,12 +139,12 @@ class VoucherTest extends \PHPUnit\Framework\TestCase
 
 	protected function getOrderProduct()
 	{
-		$manager = \Aimeos\MShop::create( $this->context, 'order/base/product' );
+		$manager = \Aimeos\MShop::create( $this->context, 'order/product' );
 
 		$search = $manager->createSearch();
 		$search->setConditions( $search->combine( '&&', array(
-			$search->compare( '==', 'order.base.product.prodcode', 'CNE' ),
-			$search->compare( '==', 'order.base.product.price', '36.00' )
+			$search->compare( '==', 'order.product.prodcode', 'CNE' ),
+			$search->compare( '==', 'order.product.price', '36.00' )
 		) ) );
 		$items = $manager->searchItems( $search );
 

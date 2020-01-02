@@ -125,9 +125,9 @@ class PayPalExpressTest extends \PHPUnit\Framework\TestCase
 		$helperForm = $this->object->process( $this->order );
 
 		$orderManager = \Aimeos\MShop\Order\Manager\Factory::create( $this->context );
-		$orderBaseManager = $orderManager->getSubManager( 'base' );
+		$orderManager = $orderManager;
 
-		$refOrderBase = $orderBaseManager->load( $this->order->getBaseId() );
+		$refOrderBase = $orderManager->load( $this->order->getId() );
 
 		$attributes = $refOrderBase->getService( 'payment', 0 )->getAttributeItems();
 
@@ -181,9 +181,9 @@ class PayPalExpressTest extends \PHPUnit\Framework\TestCase
 	{
 		//IPN Call
 		$orderManager = \Aimeos\MShop\Order\Manager\Factory::create( $this->context );
-		$orderBaseManager = $orderManager->getSubManager( 'base' );
+		$orderManager = $orderManager;
 
-		$price = $orderBaseManager->getItem( $this->order->getBaseId() )->getPrice();
+		$price = $orderManager->getItem( $this->order->getId() )->getPrice();
 		$amount = $price->getValue() + $price->getCosts();
 
 		$params = array(
@@ -220,9 +220,9 @@ class PayPalExpressTest extends \PHPUnit\Framework\TestCase
 		$result = $this->object->updatePush( $request, $response );
 		$this->assertInstanceOf( \Psr\Http\Message\ResponseInterface::class, $result );
 
-		$refOrderBase = $orderBaseManager->load( $this->order->getBaseId(), \Aimeos\MShop\Order\Item\Base\Base::PARTS_SERVICE );
+		$refOrderBase = $orderManager->load( $this->order->getId(), \Aimeos\MShop\Order\Item\Base::PARTS_SERVICE );
 		$attributes = $refOrderBase->getService( 'payment', 0 )->getAttributeItems();
-		$attrManager = $orderBaseManager->getSubManager( 'service' )->getSubManager( 'attribute' );
+		$attrManager = $orderManager->getSubManager( 'service' )->getSubManager( 'attribute' );
 
 		$attributeList = [];
 		foreach( $attributes as $attribute ) {
@@ -255,9 +255,9 @@ class PayPalExpressTest extends \PHPUnit\Framework\TestCase
 		);
 
 		$orderManager = \Aimeos\MShop\Order\Manager\Factory::create( $this->context );
-		$orderBaseManager = $orderManager->getSubManager( 'base' );
+		$orderManager = $orderManager;
 
-		$refOrderBase = $orderBaseManager->load( $this->order->getBaseId() );
+		$refOrderBase = $orderManager->load( $this->order->getId() );
 		$attributes = $refOrderBase->getService( 'payment', 0 )->getAttributeItems();
 
 		$attributeList = [];

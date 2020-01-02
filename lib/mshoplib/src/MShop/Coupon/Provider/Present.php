@@ -70,12 +70,12 @@ class Present
 
 
 	/**
-	 * Updates the result of a coupon to the order base instance.
+	 * Updates the result of a coupon to the order instance.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $base Basic order of the customer
+	 * @param \Aimeos\MShop\Order\Item\Iface $order Basic order of the customer
 	 * @return \Aimeos\MShop\Coupon\Provider\Iface Provider object for method chaining
 	 */
-	public function update( \Aimeos\MShop\Order\Item\Base\Iface $base )
+	public function update( \Aimeos\MShop\Order\Item\Iface $order )
 	{
 		$quantity = (int) $this->getConfigValue( 'present.quantity', 0 );
 		$prodcode = $this->getConfigValue( 'present.productcode' );
@@ -87,7 +87,7 @@ class Present
 			throw new \Aimeos\MShop\Coupon\Exception( $msg );
 		}
 
-		$base->setCoupon( $this->getCode(), [$this->createProduct( $prodcode, $quantity )] );
+		$order->setCoupon( $this->getCode(), [$this->createProduct( $prodcode, $quantity )] );
 		return $this;
 	}
 }

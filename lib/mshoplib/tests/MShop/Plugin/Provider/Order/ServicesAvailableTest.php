@@ -22,8 +22,8 @@ class ServicesAvailableTest extends \PHPUnit\Framework\TestCase
 	{
 		$context = \TestHelperMShop::getContext();
 		$this->plugin = \Aimeos\MShop::create( $context, 'plugin' )->createItem();
-		$this->service = \Aimeos\MShop::create( $context, 'order/base/service' )->createItem();
-		$this->order = \Aimeos\MShop::create( $context, 'order/base' )->createItem()->off(); // remove event listeners
+		$this->service = \Aimeos\MShop::create( $context, 'order/service' )->createItem();
+		$this->order = \Aimeos\MShop::create( $context, 'order' )->createItem()->off(); // remove event listeners
 
 		$this->object = new \Aimeos\MShop\Plugin\Provider\Order\ServicesAvailable( $context, $this->plugin );
 	}
@@ -78,7 +78,7 @@ class ServicesAvailableTest extends \PHPUnit\Framework\TestCase
 
 	public function testUpdateEmptyConfig()
 	{
-		$part = \Aimeos\MShop\Order\Item\Base\Base::PARTS_SERVICE;
+		$part = \Aimeos\MShop\Order\Item\Base::PARTS_SERVICE;
 
 		$this->assertEquals( $part, $this->object->update( $this->order, 'check.after', $part ) );
 
@@ -91,7 +91,7 @@ class ServicesAvailableTest extends \PHPUnit\Framework\TestCase
 
 	public function testUpdateNoServices()
 	{
-		$part = \Aimeos\MShop\Order\Item\Base\Base::PARTS_SERVICE;
+		$part = \Aimeos\MShop\Order\Item\Base::PARTS_SERVICE;
 
 		$this->plugin->setConfig( array(
 				'delivery' => false,
@@ -119,7 +119,7 @@ class ServicesAvailableTest extends \PHPUnit\Framework\TestCase
 
 	public function testUpdateEmptyServices()
 	{
-		$part = \Aimeos\MShop\Order\Item\Base\Base::PARTS_SERVICE;
+		$part = \Aimeos\MShop\Order\Item\Base::PARTS_SERVICE;
 
 		$this->order->addService( $this->service, 'payment' );
 		$this->order->addService( $this->service, 'delivery' );
@@ -153,7 +153,7 @@ class ServicesAvailableTest extends \PHPUnit\Framework\TestCase
 
 	public function testUpdateWithServices()
 	{
-		$part = \Aimeos\MShop\Order\Item\Base\Base::PARTS_SERVICE;
+		$part = \Aimeos\MShop\Order\Item\Base::PARTS_SERVICE;
 
 		$this->order->addService( $this->service, 'payment' );
 		$this->order->addService( $this->service, 'delivery' );

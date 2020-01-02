@@ -61,13 +61,13 @@ class ExampleTest extends \PHPUnit\Framework\TestCase
 
 	public function testCalcPrice()
 	{
-		$orderBaseManager = \Aimeos\MShop\Order\Manager\Factory::create( \TestHelperMShop::getContext() )->getSubManager( 'base' );
-		$search = $orderBaseManager->createSearch();
-		$search->setConditions( $search->compare( '==', 'order.base.price', '672.00' ) );
-		$result = $orderBaseManager->searchItems( $search );
+		$orderManager = \Aimeos\MShop\Order\Manager\Factory::create( \TestHelperMShop::getContext() );
+		$search = $orderManager->createSearch();
+		$search->setConditions( $search->compare( '==', 'order.price', '672.00' ) );
+		$result = $orderManager->searchItems( $search );
 
 		if( ( $item = reset( $result ) ) === false ) {
-			throw new \RuntimeException( 'No order base item found' );
+			throw new \RuntimeException( 'No order item found' );
 		}
 
 		$price = $this->object->calcPrice( $item );
@@ -79,21 +79,21 @@ class ExampleTest extends \PHPUnit\Framework\TestCase
 
 	public function testIsAvailable()
 	{
-		$orderBaseManager = \Aimeos\MShop::create( \TestHelperMShop::getContext(), 'order/base' );
+		$orderManager = \Aimeos\MShop::create( \TestHelperMShop::getContext(), 'order' );
 		$localeManager = \Aimeos\MShop\Locale\Manager\Factory::create( \TestHelperMShop::getContext() );
 
 		$localeItem = $localeManager->createItem();
 
-		$orderBaseDeItem = $orderBaseManager->createItem();
+		$orderDeItem = $orderManager->createItem();
 		$localeItem->setLanguageId( 'de' );
-		$orderBaseDeItem->setLocale( $localeItem );
+		$orderDeItem->setLocale( $localeItem );
 
-		$orderBaseEnItem = $orderBaseManager->createItem();
+		$orderEnItem = $orderManager->createItem();
 		$localeItem->setLanguageId( 'en' );
-		$orderBaseEnItem->setLocale( $localeItem );
+		$orderEnItem->setLocale( $localeItem );
 
-		$this->assertFalse( $this->object->isAvailable( $orderBaseDeItem ) );
-		$this->assertTrue( $this->object->isAvailable( $orderBaseEnItem ) );
+		$this->assertFalse( $this->object->isAvailable( $orderDeItem ) );
+		$this->assertTrue( $this->object->isAvailable( $orderEnItem ) );
 	}
 
 	public function testIsImplemented()

@@ -14,7 +14,7 @@ class PercentRebateTest extends \PHPUnit\Framework\TestCase
 {
 	private $coupon;
 	private $object;
-	private $orderBase;
+	private $order;
 
 
 	protected function setUp()
@@ -25,8 +25,8 @@ class PercentRebateTest extends \PHPUnit\Framework\TestCase
 		$this->coupon = \Aimeos\MShop\Coupon\Manager\Factory::create( $context )->createItem();
 		$this->coupon->setConfig( array( 'percentrebate.productcode' => 'U:MD', 'percentrebate.rebate' => '10' ) );
 
-		// Don't create order base item by createItem() as this would already register the plugins
-		$this->orderBase = new \Aimeos\MShop\Order\Item\Base\Standard( $priceManager->createItem(), $context->getLocale() );
+		// Don't create order item by createItem() as this would already register the plugins
+		$this->order = new \Aimeos\MShop\Order\Item\Standard( $priceManager->createItem(), $context->getLocale() );
 		$this->object = new \Aimeos\MShop\Coupon\Provider\PercentRebate( $context, $this->coupon, '90AB' );
 	}
 
@@ -34,7 +34,7 @@ class PercentRebateTest extends \PHPUnit\Framework\TestCase
 	protected function tearDown()
 	{
 		unset( $this->object );
-		unset( $this->orderBase );
+		unset( $this->order );
 	}
 
 
@@ -42,13 +42,13 @@ class PercentRebateTest extends \PHPUnit\Framework\TestCase
 	{
 		$orderProducts = $this->getOrderProducts();
 
-		$this->orderBase->addProduct( $orderProducts['CNE'] );
-		$this->orderBase->addProduct( $orderProducts['CNC'] );
+		$this->order->addProduct( $orderProducts['CNE'] );
+		$this->order->addProduct( $orderProducts['CNC'] );
 
-		$this->object->update( $this->orderBase );
+		$this->object->update( $this->order );
 
-		$coupons = $this->orderBase->getCoupons();
-		$products = $this->orderBase->getProducts();
+		$coupons = $this->order->getCoupons();
+		$products = $this->order->getProducts();
 
 		if( ( $product = reset( $coupons['90AB'] ) ) === false ) {
 			throw new \RuntimeException( 'No coupon available' );
@@ -74,11 +74,11 @@ class PercentRebateTest extends \PHPUnit\Framework\TestCase
 		] );
 
 		$orderProducts = $this->getOrderProducts();
-		$this->orderBase->addProduct( $orderProducts['CNE'] );
+		$this->order->addProduct( $orderProducts['CNE'] );
 
-		$this->object->update( $this->orderBase );
+		$this->object->update( $this->order );
 
-		$coupons = $this->orderBase->getCoupons();
+		$coupons = $this->order->getCoupons();
 
 		if( ( $product = reset( $coupons['90AB'] ) ) === false ) {
 			throw new \RuntimeException( 'No coupon available' );
@@ -98,11 +98,11 @@ class PercentRebateTest extends \PHPUnit\Framework\TestCase
 		] );
 
 		$orderProducts = $this->getOrderProducts();
-		$this->orderBase->addProduct( $orderProducts['CNE'] );
+		$this->order->addProduct( $orderProducts['CNE'] );
 
-		$this->object->update( $this->orderBase );
+		$this->object->update( $this->order );
 
-		$coupons = $this->orderBase->getCoupons();
+		$coupons = $this->order->getCoupons();
 
 		if( ( $product = reset( $coupons['90AB'] ) ) === false ) {
 			throw new \RuntimeException( 'No coupon available' );
@@ -124,13 +124,13 @@ class PercentRebateTest extends \PHPUnit\Framework\TestCase
 		$products['CNC']->setQuantity( 1 );
 		$products['CNE']->setQuantity( 1 );
 
-		$this->orderBase->addProduct( $products['CNE'] );
-		$this->orderBase->addProduct( $products['CNC'] );
+		$this->order->addProduct( $products['CNE'] );
+		$this->order->addProduct( $products['CNC'] );
 
-		$this->object->update( $this->orderBase );
+		$this->object->update( $this->order );
 
-		$coupons = $this->orderBase->getCoupons();
-		$products = $this->orderBase->getProducts();
+		$coupons = $this->order->getCoupons();
+		$products = $this->order->getProducts();
 
 		if( ( $couponProduct20 = reset( $coupons['90AB'] ) ) === false ) {
 			throw new \RuntimeException( 'No coupon available' );
@@ -156,7 +156,7 @@ class PercentRebateTest extends \PHPUnit\Framework\TestCase
 		$object = new \Aimeos\MShop\Coupon\Provider\PercentRebate( $context, $couponItem, '90AB' );
 
 		$this->setExpectedException( \Aimeos\MShop\Coupon\Exception::class );
-		$object->update( $this->orderBase );
+		$object->update( $this->order );
 	}
 
 
@@ -197,25 +197,25 @@ class PercentRebateTest extends \PHPUnit\Framework\TestCase
 
 	public function testIsAvailable()
 	{
-		$this->assertTrue( $this->object->isAvailable( $this->orderBase ) );
+		$this->assertTrue( $this->object->isAvailable( $this->order ) );
 	}
 
 
 	/**
 	 * Return the order products.
 	 *
-	 * @return \Aimeos\MShop\Order\Item\Base\Product\Iface[]
+	 * @return \Aimeos\MShop\Order\Item\Product\Iface[]
 	 * @throws \Exception
 	 */
 	protected function getOrderProducts()
 	{
 		$products = [];
-		$manager = \Aimeos\MShop::create( \TestHelperMShop::getContext(), 'order/base/product' );
+		$manager = \Aimeos\MShop::create( \TestHelperMShop::getContext(), 'order/product' );
 
 		$search = $manager->createSearch();
 		$search->setConditions( $search->combine( '&&', array(
-			$search->compare( '==', 'order.base.product.prodcode', array( 'CNE', 'CNC' ) ),
-			$search->compare( '==', 'order.base.product.price', array( '600.00', '36.00' ) )
+			$search->compare( '==', 'order.product.prodcode', array( 'CNE', 'CNC' ) ),
+			$search->compare( '==', 'order.product.price', array( '600.00', '36.00' ) )
 		) ) );
 		$items = $manager->searchItems( $search );
 

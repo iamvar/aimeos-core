@@ -93,7 +93,7 @@ class StandardTest extends \PHPUnit\Framework\TestCase
 		$results = $this->object->searchItems( $search );
 
 		if( ( $item = reset( $results ) ) === false ) {
-			throw new \RuntimeException( 'No order base item found.' );
+			throw new \RuntimeException( 'No order item found.' );
 		}
 
 		$item->setId( null );

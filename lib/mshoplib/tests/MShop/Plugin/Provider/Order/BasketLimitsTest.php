@@ -19,15 +19,15 @@ class BasketLimitsTest extends \PHPUnit\Framework\TestCase
 	protected function setUp()
 	{
 		$context = \TestHelperMShop::getContext();
-		$this->order = \Aimeos\MShop::create( $context, 'order/base' )->createItem()->off(); // remove event listeners
+		$this->order = \Aimeos\MShop::create( $context, 'order' )->createItem()->off(); // remove event listeners
 
-		$orderBaseProductManager = \Aimeos\MShop::create( $context, 'order/base/product' );
-		$search = $orderBaseProductManager->createSearch();
+		$orderProductManager = \Aimeos\MShop::create( $context, 'order/product' );
+		$search = $orderProductManager->createSearch();
 		$search->setConditions( $search->combine( '&&', array(
-			$search->compare( '==', 'order.base.product.prodcode', array( 'CNE', 'CNC' ) ),
-			$search->compare( '==', 'order.base.product.price', array( '600.00', '36.00' ) )
+			$search->compare( '==', 'order.product.prodcode', array( 'CNE', 'CNC' ) ),
+			$search->compare( '==', 'order.product.price', array( '600.00', '36.00' ) )
 		) ) );
-		$items = $orderBaseProductManager->searchItems( $search );
+		$items = $orderProductManager->searchItems( $search );
 
 		if( count( $items ) < 2 ) {
 			throw new \RuntimeException( 'Please fix the test data in your database.' );
@@ -103,7 +103,7 @@ class BasketLimitsTest extends \PHPUnit\Framework\TestCase
 	{
 		$this->products['CNE']->setQuantity( 4 );
 		$this->order->addProduct( $this->products['CNE'] );
-		$value = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+		$value = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 
 		$this->assertEquals( $value, $this->object->update( $this->order, 'check.after', $value ) );
 	}
@@ -112,7 +112,7 @@ class BasketLimitsTest extends \PHPUnit\Framework\TestCase
 	public function testUpdateMinProductsFails()
 	{
 		$this->order->addProduct( $this->products['CNC'] );
-		$value = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+		$value = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 
 		$this->setExpectedException( \Aimeos\MShop\Plugin\Provider\Exception::class );
 		$this->object->update( $this->order, 'check.after', $value );
@@ -123,7 +123,7 @@ class BasketLimitsTest extends \PHPUnit\Framework\TestCase
 	{
 		$this->products['CNE']->setQuantity( 6 );
 		$this->order->addProduct( $this->products['CNE'] );
-		$value = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+		$value = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 
 		$this->setExpectedException( \Aimeos\MShop\Plugin\Provider\Exception::class );
 		$this->object->update( $this->order, 'check.after', $value );
@@ -133,7 +133,7 @@ class BasketLimitsTest extends \PHPUnit\Framework\TestCase
 	public function testUpdateMinValueFails()
 	{
 		$this->order->addProduct( $this->products['CNE'] );
-		$value = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+		$value = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 
 		$this->setExpectedException( \Aimeos\MShop\Plugin\Provider\Exception::class );
 		$this->object->update( $this->order, 'check.after', $value );
@@ -144,7 +144,7 @@ class BasketLimitsTest extends \PHPUnit\Framework\TestCase
 	{
 		$this->products['CNC']->setQuantity( 2 );
 		$this->order->addProduct( $this->products['CNC'] );
-		$value = \Aimeos\MShop\Order\Item\Base\Base::PARTS_PRODUCT;
+		$value = \Aimeos\MShop\Order\Item\Base::PARTS_PRODUCT;
 
 		$this->setExpectedException( \Aimeos\MShop\Plugin\Provider\Exception::class );
 		$this->object->update( $this->order, 'check.after', $value );

@@ -21,7 +21,7 @@ class AutofillTest extends \PHPUnit\Framework\TestCase
 	{
 		$this->context = \TestHelperMShop::getContext();
 		$this->plugin = \Aimeos\MShop::create( $this->context, 'plugin' )->createItem();
-		$this->order = \Aimeos\MShop::create( $this->context, 'order/base' )->createItem()->off(); // remove event listeners
+		$this->order = \Aimeos\MShop::create( $this->context, 'order' )->createItem()->off(); // remove event listeners
 
 		$this->object = new \Aimeos\MShop\Plugin\Provider\Order\Autofill( $this->context, $this->plugin );
 	}
@@ -132,18 +132,14 @@ class AutofillTest extends \PHPUnit\Framework\TestCase
 		$orderStub = $this->getMockBuilder( \Aimeos\MShop\Order\Manager\Standard::class )
 			->setConstructorArgs( [$this->context] )->setMethods( ['getSubManager'] )->getMock();
 
-		$orderBaseStub = $this->getMockBuilder( \Aimeos\MShop\Order\Manager\Base\Standard::class )
-			->setConstructorArgs( [$this->context] )->setMethods( ['getSubManager'] )->getMock();
-
-		$orderBaseAddressStub = $this->getMockBuilder( \Aimeos\MShop\Order\Manager\Base\Address\Standard::class )
+		$orderAddressStub = $this->getMockBuilder( \Aimeos\MShop\Order\Manager\Address\Standard::class )
 			->setConstructorArgs( [$this->context] )->setMethods( ['searchItems'] )->getMock();
 
-		$item1 = $orderBaseAddressStub->createItem()->setType( \Aimeos\MShop\Order\Item\Base\Address\Base::TYPE_DELIVERY );
-		$item2 = $orderBaseAddressStub->createItem()->setType( \Aimeos\MShop\Order\Item\Base\Address\Base::TYPE_PAYMENT );
+		$item1 = $orderAddressStub->createItem()->setType( \Aimeos\MShop\Order\Item\Address\Base::TYPE_DELIVERY );
+		$item2 = $orderAddressStub->createItem()->setType( \Aimeos\MShop\Order\Item\Address\Base::TYPE_PAYMENT );
 
-		$orderStub->expects( $this->any() )->method( 'getSubManager' )->will( $this->returnValue( $orderBaseStub ) );
-		$orderBaseStub->expects( $this->any() )->method( 'getSubManager' )->will( $this->returnValue( $orderBaseAddressStub ) );
-		$orderBaseAddressStub->expects( $this->once() )->method( 'searchItems' )->will( $this->returnValue( [$item1, $item2] ) );
+		$orderStub->expects( $this->any() )->method( 'getSubManager' )->will( $this->returnValue( $orderAddressStub ) );
+		$orderAddressStub->expects( $this->once() )->method( 'searchItems' )->will( $this->returnValue( [$item1, $item2] ) );
 
 		\Aimeos\MShop\Order\Manager\Factory::injectManager( '\Aimeos\MShop\Order\Manager\PluginAutofill', $orderStub );
 		$this->context->getConfig()->set( 'mshop/order/manager/name', 'PluginAutofill' );
@@ -170,21 +166,17 @@ class AutofillTest extends \PHPUnit\Framework\TestCase
 		$orderStub = $this->getMockBuilder( \Aimeos\MShop\Order\Manager\Standard::class )
 			->setConstructorArgs( [$this->context] )->setMethods( ['getSubManager'] )->getMock();
 
-		$orderBaseStub = $this->getMockBuilder( \Aimeos\MShop\Order\Manager\Base\Standard::class )
-			->setConstructorArgs( [$this->context] )->setMethods( ['getSubManager'] )->getMock();
-
-		$orderBaseServiceStub = $this->getMockBuilder( \Aimeos\MShop\Order\Manager\Base\Service\Standard::class )
+		$orderServiceStub = $this->getMockBuilder( \Aimeos\MShop\Order\Manager\Service\Standard::class )
 			->setConstructorArgs( [$this->context] )->setMethods( ['searchItems'] )->getMock();
 
-		$item1 = $orderBaseServiceStub->createItem()->setCode( 'unitcode' )
-			->setType( \Aimeos\MShop\Order\Item\Base\Service\Base::TYPE_DELIVERY );
-		$item2 = $orderBaseServiceStub->createItem()->setCode( 'unitpaymentcode' )
-			->setType( \Aimeos\MShop\Order\Item\Base\Service\Base::TYPE_PAYMENT )
-			->setAttributeItems( [new \Aimeos\MShop\Order\Item\Base\Service\Attribute\Standard()] );
+		$item1 = $orderServiceStub->createItem()->setCode( 'unitcode' )
+			->setType( \Aimeos\MShop\Order\Item\Service\Base::TYPE_DELIVERY );
+		$item2 = $orderServiceStub->createItem()->setCode( 'unitpaymentcode' )
+			->setType( \Aimeos\MShop\Order\Item\Service\Base::TYPE_PAYMENT )
+			->setAttributeItems( [new \Aimeos\MShop\Order\Item\Service\Attribute\Standard()] );
 
-		$orderStub->expects( $this->any() )->method( 'getSubManager' )->will( $this->returnValue( $orderBaseStub ) );
-		$orderBaseStub->expects( $this->any() )->method( 'getSubManager' )->will( $this->returnValue( $orderBaseServiceStub ) );
-		$orderBaseServiceStub->expects( $this->once() )->method( 'searchItems' )->will( $this->returnValue( [$item1, $item2] ) );
+		$orderStub->expects( $this->any() )->method( 'getSubManager' )->will( $this->returnValue( $orderServiceStub ) );
+		$orderServiceStub->expects( $this->once() )->method( 'searchItems' )->will( $this->returnValue( [$item1, $item2] ) );
 
 		\Aimeos\MShop\Order\Manager\Factory::injectManager( '\Aimeos\MShop\Order\Manager\PluginAutofill', $orderStub );
 		$this->context->getConfig()->set( 'mshop/order/manager/name', 'PluginAutofill' );
@@ -200,7 +192,7 @@ class AutofillTest extends \PHPUnit\Framework\TestCase
 		$this->assertEquals( 2, count( $this->order->getServices() ) );
 		$this->assertEquals( [], $this->order->getAddresses() );
 
-		foreach( $this->order->getService( \Aimeos\MShop\Order\Item\Base\Service\Base::TYPE_PAYMENT ) as $service ) {
+		foreach( $this->order->getService( \Aimeos\MShop\Order\Item\Service\Base::TYPE_PAYMENT ) as $service ) {
 			$this->assertEquals( 1, count( $service->getAttributeItems() ) );
 		}
 	}
@@ -212,33 +204,33 @@ class AutofillTest extends \PHPUnit\Framework\TestCase
 		$this->context->setUserId( $manager->findItem( 'UTC001' )->getId() );
 
 		$this->plugin->setConfig( ['address' => '1'] );
-		$type = \Aimeos\MShop\Order\Item\Base\Address\Base::TYPE_PAYMENT;
+		$type = \Aimeos\MShop\Order\Item\Address\Base::TYPE_PAYMENT;
 
 		$this->assertEquals( null, $this->object->update( $this->order, 'addProduct.after' ) );
 		$this->assertEquals( [], $this->order->getServices() );
 		$this->assertEquals( 1, count( $this->order->getAddresses() ) );
-		$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Base\Address\Iface::class, $this->order->getAddress( $type, 0 ) );
+		$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Address\Iface::class, $this->order->getAddress( $type, 0 ) );
 	}
 
 
 	public function testUpdateDelivery()
 	{
 		$this->plugin->setConfig( ['delivery' => '1'] );
-		$type = \Aimeos\MShop\Order\Item\Base\Service\Base::TYPE_DELIVERY;
+		$type = \Aimeos\MShop\Order\Item\Service\Base::TYPE_DELIVERY;
 
 		$this->assertEquals( null, $this->object->update( $this->order, 'addProduct.after' ) );
 		$this->assertEquals( [], $this->order->getAddresses() );
 		$this->assertEquals( 1, count( $this->order->getService( $type ) ) );
 
 		foreach( $this->order->getService( $type ) as $item ) {
-			$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Base\Service\Iface::class, $item );
+			$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Service\Iface::class, $item );
 		}
 	}
 
 
 	public function testUpdateDeliveryCode()
 	{
-		$type = \Aimeos\MShop\Order\Item\Base\Service\Base::TYPE_DELIVERY;
+		$type = \Aimeos\MShop\Order\Item\Service\Base::TYPE_DELIVERY;
 		$this->plugin->setConfig( ['delivery' => '1', 'deliverycode' => 'unitcode'] );
 
 		$this->assertEquals( null, $this->object->update( $this->order, 'addProduct.after' ) );
@@ -247,7 +239,7 @@ class AutofillTest extends \PHPUnit\Framework\TestCase
 
 		foreach( $this->order->getService( $type ) as $item )
 		{
-			$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Base\Service\Iface::class, $item );
+			$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Service\Iface::class, $item );
 			$this->assertEquals( 'unitcode', $item->getCode() );
 		}
 	}
@@ -255,7 +247,7 @@ class AutofillTest extends \PHPUnit\Framework\TestCase
 
 	public function testUpdateDeliveryCodeNotExists()
 	{
-		$type = \Aimeos\MShop\Order\Item\Base\Service\Base::TYPE_DELIVERY;
+		$type = \Aimeos\MShop\Order\Item\Service\Base::TYPE_DELIVERY;
 		$this->plugin->setConfig( ['delivery' => '1', 'deliverycode' => 'xyz'] );
 
 		$this->assertEquals( null, $this->object->update( $this->order, 'addProduct.after' ) );
@@ -263,14 +255,14 @@ class AutofillTest extends \PHPUnit\Framework\TestCase
 		$this->assertEquals( 1, count( $this->order->getService( $type ) ) );
 
 		foreach( $this->order->getService( $type ) as $item ) {
-			$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Base\Service\Iface::class, $item );
+			$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Service\Iface::class, $item );
 		}
 	}
 
 
 	public function testUpdatePayment()
 	{
-		$type = \Aimeos\MShop\Order\Item\Base\Service\Base::TYPE_PAYMENT;
+		$type = \Aimeos\MShop\Order\Item\Service\Base::TYPE_PAYMENT;
 		$this->plugin->setConfig( ['payment' => '1'] );
 
 		$this->assertEquals( null, $this->object->update( $this->order, 'addProduct.after' ) );
@@ -278,14 +270,14 @@ class AutofillTest extends \PHPUnit\Framework\TestCase
 		$this->assertEquals( 1, count( $this->order->getService( $type ) ) );
 
 		foreach( $this->order->getService( $type ) as $item ) {
-			$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Base\Service\Iface::class, $item );
+			$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Service\Iface::class, $item );
 		}
 	}
 
 
 	public function testUpdatePaymentCode()
 	{
-		$type = \Aimeos\MShop\Order\Item\Base\Service\Base::TYPE_PAYMENT;
+		$type = \Aimeos\MShop\Order\Item\Service\Base::TYPE_PAYMENT;
 		$this->plugin->setConfig( ['payment' => '1', 'paymentcode' => 'unitpaymentcode'] );
 
 		$this->assertEquals( null, $this->object->update( $this->order, 'addProduct.after' ) );
@@ -294,7 +286,7 @@ class AutofillTest extends \PHPUnit\Framework\TestCase
 
 		foreach( $this->order->getService( $type ) as $item )
 		{
-			$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Base\Service\Iface::class, $item );
+			$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Service\Iface::class, $item );
 			$this->assertEquals( 'unitpaymentcode', $item->getCode() );
 		}
 	}
@@ -302,7 +294,7 @@ class AutofillTest extends \PHPUnit\Framework\TestCase
 
 	public function testUpdatePaymentCodeNotExists()
 	{
-		$type = \Aimeos\MShop\Order\Item\Base\Service\Base::TYPE_PAYMENT;
+		$type = \Aimeos\MShop\Order\Item\Service\Base::TYPE_PAYMENT;
 		$this->plugin->setConfig( ['payment' => '1', 'paymentcode' => 'xyz'] );
 
 		$this->assertEquals( null, $this->object->update( $this->order, 'addProduct.after' ) );
@@ -310,7 +302,7 @@ class AutofillTest extends \PHPUnit\Framework\TestCase
 		$this->assertEquals( 1, count( $this->order->getService( $type ) ) );
 
 		foreach( $this->order->getService( $type ) as $item ) {
-			$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Base\Service\Iface::class, $item );
+			$this->assertInstanceOf( \Aimeos\MShop\Order\Item\Service\Iface::class, $item );
 		}
 	}
 }

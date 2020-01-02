@@ -60,7 +60,7 @@ class ShippingTest extends \PHPUnit\Framework\TestCase
 
 	public function testRegister()
 	{
-		$this->object->register( \Aimeos\MShop::create( $this->context, 'order/base' )->createItem() );
+		$this->object->register( \Aimeos\MShop::create( $this->context, 'order' )->createItem() );
 	}
 
 
@@ -87,25 +87,25 @@ class ShippingTest extends \PHPUnit\Framework\TestCase
 		}
 		$price = $price->setValue( 10.00 );
 
-		$orderBaseProductManager = \Aimeos\MShop::create( $this->context, 'order/base/product' );
-		$product = $orderBaseProductManager->createItem()->copyFrom( $products['CNE'] )->setPrice( $price );
-		$product2 = $orderBaseProductManager->createItem()->copyFrom( $products['CNC'] )->setPrice( $price );
-		$product3 = $orderBaseProductManager->createItem()->copyFrom( $products['IJKL'] )->setPrice( $price );
+		$orderProductManager = \Aimeos\MShop::create( $this->context, 'order/product' );
+		$product = $orderProductManager->createItem()->copyFrom( $products['CNE'] )->setPrice( $price );
+		$product2 = $orderProductManager->createItem()->copyFrom( $products['CNC'] )->setPrice( $price );
+		$product3 = $orderProductManager->createItem()->copyFrom( $products['IJKL'] )->setPrice( $price );
 
-		$orderBaseServiceManager = \Aimeos\MShop::create( $this->context, 'order/base/service' );
-		$serviceSearch = $orderBaseServiceManager->createSearch();
+		$orderServiceManager = \Aimeos\MShop::create( $this->context, 'order/service' );
+		$serviceSearch = $orderServiceManager->createSearch();
 		$exp = array(
-			$serviceSearch->compare( '==', 'order.base.service.type', 'delivery' ),
-			$serviceSearch->compare( '==', 'order.base.service.costs', '5.00' )
+			$serviceSearch->compare( '==', 'order.service.type', 'delivery' ),
+			$serviceSearch->compare( '==', 'order.service.costs', '5.00' )
 		);
 		$serviceSearch->setConditions( $serviceSearch->combine( '&&', $exp ) );
-		$results = $orderBaseServiceManager->searchItems( $serviceSearch );
+		$results = $orderServiceManager->searchItems( $serviceSearch );
 
 		if( ( $delivery = reset( $results ) ) === false ) {
 			throw new \RuntimeException( 'No order service item found' );
 		}
 
-		$order = \Aimeos\MShop::create( $this->context, 'order/base' )->createItem()->off(); // remove event listeners
+		$order = \Aimeos\MShop::create( $this->context, 'order' )->createItem()->off(); // remove event listeners
 
 		$order = $order->addService( $delivery, 'delivery' )
 			->addProduct( $product )->addProduct( $product2 )->addProduct( $product3 );

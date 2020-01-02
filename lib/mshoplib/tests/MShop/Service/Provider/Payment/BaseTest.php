@@ -25,7 +25,7 @@ class BaseTest extends \PHPUnit\Framework\TestCase
 		$result = $servManager->searchItems( $search, array( 'price' ) );
 
 		if( ( $item = reset( $result ) ) === false ) {
-			throw new \RuntimeException( 'No order base item found' );
+			throw new \RuntimeException( 'No order item found' );
 		}
 
 		$this->object = new TestBase( $this->context, $item );
@@ -102,7 +102,7 @@ class BaseTest extends \PHPUnit\Framework\TestCase
 	public function testSetConfigFE()
 	{
 		$item = \Aimeos\MShop\Order\Manager\Factory::create( $this->context )
-			->getSubManager( 'base' )->getSubManager( 'service' )->createItem();
+			->getSubManager( 'service' )->createItem();
 
 		$this->object->setConfigFE( $item, [] );
 	}

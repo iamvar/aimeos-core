@@ -22,7 +22,7 @@ class LocaleAddTestData extends \Aimeos\MW\Setup\Task\MShopAddLocaleData
 	 */
 	public function getPreDependencies() : array
 	{
-		return ['MShopAddLocaleLangCurData'];
+		return ['MShopAddLocaleLangCurData', 'OrderMergeBase'];
 	}
 
 

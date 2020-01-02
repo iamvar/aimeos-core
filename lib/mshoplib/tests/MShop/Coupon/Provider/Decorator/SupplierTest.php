@@ -13,7 +13,7 @@ class SupplierTest extends \PHPUnit\Framework\TestCase
 {
 	private $object;
 	private $context;
-	private $orderBase;
+	private $order;
 	private $couponItem;
 
 
@@ -30,26 +30,26 @@ class SupplierTest extends \PHPUnit\Framework\TestCase
 		$serviceManager = \Aimeos\MShop::create( $this->context, 'service' );
 		$service = $serviceManager->findItem( 'unitcode' );
 
-		$orderServiceAttrManager = \Aimeos\MShop::create( $this->context, 'order/base/service/attribute' );
+		$orderServiceAttrManager = \Aimeos\MShop::create( $this->context, 'order/service/attribute' );
 		$orderServiceAttr = $orderServiceAttrManager->createItem();
 		$orderServiceAttr->setCode( 'supplier.code' );
 		$orderServiceAttr->setType( 'delivery' );
 		$orderServiceAttr->setValue( 'berlin' );
 
-		$orderServiceManager = \Aimeos\MShop::create( $this->context, 'order/base/service' );
+		$orderServiceManager = \Aimeos\MShop::create( $this->context, 'order/service' );
 		$orderService = $orderServiceManager->createItem();
 		$orderService->copyFrom( $service );
 		$orderService->setAttributeItems( [$orderServiceAttr] );
 
-		$this->orderBase = new \Aimeos\MShop\Order\Item\Base\Standard( $priceManager->createItem(), $this->context->getLocale() );
-		$this->orderBase->addService( $orderService, \Aimeos\MShop\Order\Item\Base\Service\Base::TYPE_DELIVERY );
+		$this->order = new \Aimeos\MShop\Order\Item\Standard( $priceManager->createItem(), $this->context->getLocale() );
+		$this->order->addService( $orderService, \Aimeos\MShop\Order\Item\Service\Base::TYPE_DELIVERY );
 	}
 
 
 	protected function tearDown()
 	{
 		unset( $this->object );
-		unset( $this->orderBase );
+		unset( $this->order );
 		unset( $this->couponItem );
 	}
 
@@ -85,7 +85,7 @@ class SupplierTest extends \PHPUnit\Framework\TestCase
 	{
 		$this->couponItem->setConfig( array( 'supplier.code' => 'berlin' ) );
 
-		$this->assertTrue( $this->object->isAvailable( $this->orderBase ) );
+		$this->assertTrue( $this->object->isAvailable( $this->order ) );
 	}
 
 
@@ -93,12 +93,12 @@ class SupplierTest extends \PHPUnit\Framework\TestCase
 	{
 		$this->couponItem->setConfig( array( 'supplier.code' => 'hamburg' ) );
 
-		$this->assertFalse( $this->object->isAvailable( $this->orderBase ) );
+		$this->assertFalse( $this->object->isAvailable( $this->order ) );
 	}
 
 
 	public function testIsAvailableNoSupplier()
 	{
-		$this->assertFalse( $this->object->isAvailable( $this->orderBase ) );
+		$this->assertFalse( $this->object->isAvailable( $this->order ) );
 	}
 }

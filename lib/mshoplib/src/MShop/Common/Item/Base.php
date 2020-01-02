@@ -122,7 +122,7 @@ abstract class Base
 	 *
 	 * @param string $name Name of the property
 	 * @param mixed $value New property value
-	 * @return \Aimeos\MShop\Order\Item\Base\Iface Order base item for method chaining
+	 * @return \Aimeos\MShop\Order\Item\Iface Order item for method chaining
 	 */
 	public function set( $name, $value )
 	{

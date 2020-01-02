@@ -88,12 +88,12 @@ class PercentRebate
 
 
 	/**
-	 * Updates the result of a coupon to the order base instance.
+	 * Updates the result of a coupon to the order instance.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $base Basic order of the customer
+	 * @param \Aimeos\MShop\Order\Item\Iface $order Basic order of the customer
 	 * @return \Aimeos\MShop\Coupon\Provider\Iface Provider object for method chaining
 	 */
-	public function update( \Aimeos\MShop\Order\Item\Base\Iface $base )
+	public function update( \Aimeos\MShop\Order\Item\Iface $order )
 	{
 		$rebate = (float) $this->getConfigValue( 'percentrebate.rebate', 0 );
 		$prodcode = $this->getConfigValue( 'percentrebate.productcode' );
@@ -106,14 +106,14 @@ class PercentRebate
 		}
 
 		$sum = 0;
-		$base->setCoupon( $this->getCode(), [] );
+		$order->setCoupon( $this->getCode(), [] );
 
-		foreach( $base->getProducts() as $product ) {
+		foreach( $order->getProducts() as $product ) {
 			$sum += ( $product->getPrice()->getValue() + $product->getPrice()->getCosts() ) * $product->getQuantity();
 		}
 
 		$rebate = $this->round( $sum * $rebate / 100 );
-		$base->setCoupon( $this->getCode(), $this->createRebateProducts( $base, $prodcode, $rebate ) );
+		$order->setCoupon( $this->getCode(), $this->createRebateProducts( $order, $prodcode, $rebate ) );
 
 		return $this;
 	}

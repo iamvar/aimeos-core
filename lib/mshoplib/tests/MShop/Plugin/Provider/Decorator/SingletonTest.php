@@ -21,7 +21,7 @@ class SingletonTest extends \PHPUnit\Framework\TestCase
 		$context = \TestHelperMShop::getContext();
 
 		$priceItem = \Aimeos\MShop\Price\Manager\Factory::create( $context )->createItem();
-		$this->order = new \Aimeos\MShop\Order\Item\Base\Standard( $priceItem, $context->getLocale() );
+		$this->order = new \Aimeos\MShop\Order\Item\Standard( $priceItem, $context->getLocale() );
 
 		$pluginManager = \Aimeos\MShop\Plugin\Manager\Factory::create( $context );
 		$item = $pluginManager->createItem();

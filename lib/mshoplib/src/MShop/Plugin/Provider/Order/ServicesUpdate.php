@@ -66,7 +66,7 @@ class ServicesUpdate
 	 */
 	public function update( \Aimeos\MW\Observer\Publisher\Iface $order, $action, $value = null )
 	{
-		\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Base\Iface::class, $order );
+		\Aimeos\MW\Common\Base::checkClass( \Aimeos\MShop\Order\Item\Iface::class, $order );
 
 		$services = $order->getServices();
 
@@ -119,7 +119,7 @@ class ServicesUpdate
 	 * Returns the service items for the given order services
 	 *
 	 * @param array $services Associative list of service types as key and list
-	 * 	of items implementing \Aimeos\MShop\Order\Item\Base\Service\Iface as values
+	 * 	of items implementing \Aimeos\MShop\Order\Item\Service\Iface as values
 	 * @return \Aimeos\MShop\Service\Item\Iface[] List of service items with IDs as keys and items as values
 	 */
 	protected function getServiceItems( array $services )

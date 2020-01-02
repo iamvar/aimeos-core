@@ -81,10 +81,10 @@ class Category
 	/**
 	 * Checks if the products are withing the allowed code is allowed for the service provider.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $basket Basket object
+	 * @param \Aimeos\MShop\Order\Item\Iface $basket Basket object
 	 * @return boolean True if payment provider can be used, false if not
 	 */
-	public function isAvailable( \Aimeos\MShop\Order\Item\Base\Iface $basket )
+	public function isAvailable( \Aimeos\MShop\Order\Item\Iface $basket )
 	{
 		$catalogIds = $this->getRefCatalogIds( $this->getProductIds( $basket ) );
 
@@ -163,10 +163,10 @@ class Category
 	/**
 	 * Returns the products IDs from the products in the basket
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $basket Basket object with ordered products included
+	 * @param \Aimeos\MShop\Order\Item\Iface $basket Basket object with ordered products included
 	 * @return array List of proudct IDs
 	 */
-	protected function getProductIds( \Aimeos\MShop\Order\Item\Base\Iface $basket )
+	protected function getProductIds( \Aimeos\MShop\Order\Item\Iface $basket )
 	{
 		$productIds = [];
 

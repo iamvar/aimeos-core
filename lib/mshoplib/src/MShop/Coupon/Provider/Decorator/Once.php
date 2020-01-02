@@ -24,12 +24,12 @@ class Once
 	/**
 	 * Checks for requirements.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $base Basic order of the customer
+	 * @param \Aimeos\MShop\Order\Item\Iface $order Basic order of the customer
 	 * @return boolean True if the requirements are met, false if not
 	 */
-	public function isAvailable( \Aimeos\MShop\Order\Item\Base\Iface $base )
+	public function isAvailable( \Aimeos\MShop\Order\Item\Iface $order )
 	{
-		$addresses = $base->getAddress( \Aimeos\MShop\Order\Item\Base\Address\Base::TYPE_PAYMENT );
+		$addresses = $order->getAddress( \Aimeos\MShop\Order\Item\Address\Base::TYPE_PAYMENT );
 
 		if( ( $address = current( $addresses ) ) !== false )
 		{
@@ -37,8 +37,8 @@ class Once
 
 			$search = $manager->createSearch()->setSlice( 0, 1 );
 			$expr = [
-				$search->compare( '==', 'order.base.address.email', $address->getEmail() ),
-				$search->compare( '==', 'order.base.coupon.code', $this->getCode() ),
+				$search->compare( '==', 'order.address.email', $address->getEmail() ),
+				$search->compare( '==', 'order.coupon.code', $this->getCode() ),
 				$search->compare( '>=', 'order.statuspayment', \Aimeos\MShop\Order\Item\Base::PAY_PENDING ),
 			];
 			$search->setConditions( $search->combine( '&&', $expr ) );
@@ -48,6 +48,6 @@ class Once
 			}
 		}
 
-		return parent::isAvailable( $base );
+		return parent::isAvailable( $order );
 	}
 }

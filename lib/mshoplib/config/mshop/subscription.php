@@ -51,7 +51,7 @@ return array(
 			'search' => array(
 				'ansi' => '
 					SELECT :columns
-						mord."id" AS "subscription.id", mord."baseid" AS "subscription.ordbaseid",
+						mord."id" AS "subscription.id", mord."baseid" AS "subscription.orderid",
 						mord."ordprodid" AS "subscription.ordprodid", mord."siteid" AS "subscription.siteid",
 						mord."next" AS "subscription.datenext", mord."end" AS "subscription.dateend",
 						mord."interval" AS "subscription.interval", mord."reason" AS "subscription.reason",

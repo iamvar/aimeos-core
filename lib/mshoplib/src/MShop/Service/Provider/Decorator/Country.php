@@ -98,13 +98,13 @@ class Country
 	/**
 	 * Checks if the country code is allowed for the service provider.
 	 *
-	 * @param \Aimeos\MShop\Order\Item\Base\Iface $basket Basket object
+	 * @param \Aimeos\MShop\Order\Item\Iface $basket Basket object
 	 * @return boolean True if payment provider can be used, false if not
 	 */
-	public function isAvailable( \Aimeos\MShop\Order\Item\Base\Iface $basket )
+	public function isAvailable( \Aimeos\MShop\Order\Item\Iface $basket )
 	{
-		$paymentType = \Aimeos\MShop\Order\Item\Base\Address\Base::TYPE_PAYMENT;
-		$deliveryType = \Aimeos\MShop\Order\Item\Base\Address\Base::TYPE_DELIVERY;
+		$paymentType = \Aimeos\MShop\Order\Item\Address\Base::TYPE_PAYMENT;
+		$deliveryType = \Aimeos\MShop\Order\Item\Address\Base::TYPE_DELIVERY;
 
 
 		if( ( $addresses = $basket->getAddress( $deliveryType ) ) !== [] )
